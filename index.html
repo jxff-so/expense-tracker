@@ -479,8 +479,7 @@ function renderList(){
     const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
     const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     const el=document.createElement('div');el.className='txn';
-    const initials=short(c.name).slice(0,2).toUpperCase();
-    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}18"><span style="font-size:11px;font-weight:800;color:${c.hex};font-family:'Syne',sans-serif;letter-spacing:.02em">${initials}</span></div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
+    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}18;font-size:20px">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
     l.appendChild(el);
   });
 }
