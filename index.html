@@ -12,98 +12,112 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#f5f0e8;--surface:#ede8df;--surface2:#e4ddd2;
-  --border:rgba(100,80,50,0.12);--text:#2c2416;--muted:#9e8e78;
-  --accent:#7c5c2e;--accent-bg:rgba(124,92,46,0.1);
-  --accent-light:#c8a97a;--danger:#c0392b;
-  --food:#b85c2e;--shopping:#7c5c2e;--travel:#4a7c6f;
-  --services:#5a6e8c;--entertainment:#8c5a7c;--health:#4a7c4a;
-  --transport:#6e6e2e;--misc:#7c6e5a;
+  --bg:#faf7f2;--surface:#f2ece0;--surface2:#ebe3d5;
+  --border:rgba(140,110,70,0.13);--text:#2a1f0f;--muted:#a8947a;
+  --accent:#8b6340;--accent-bg:rgba(139,99,64,0.09);
+  --accent-light:#d4a96a;--danger:#c0392b;
+  --c-food:#c0622a;--c-shopping:#7a5535;--c-travel:#3a7a6a;
+  --c-services:#4a6080;--c-entertainment:#7a4a80;--c-health:#3a7a3a;
+  --c-transport:#6a6a20;--c-misc:#7a6a50;
 }
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100dvh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
 .screen{display:none;flex-direction:column;min-height:100dvh}
 .screen.active{display:flex}
 
-#setup{padding:60px 28px 40px;gap:22px;justify-content:center}
+/* ── SETUP ── */
+#setup{padding:64px 28px 44px;gap:20px;justify-content:center;background:var(--bg)}
 .logo{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
-.big-title{font-size:38px;font-weight:800;line-height:1.05;color:var(--text)}
+.big-title{font-size:36px;font-weight:800;line-height:1.08;color:var(--text)}
 .big-title span{color:var(--accent)}
 .sub{font-size:13px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
 .field-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+input{width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 input:focus{border-color:var(--accent-light)}
 input::placeholder{color:var(--muted)}
-.btn{background:var(--accent);color:#f5f0e8;border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:transform .15s,opacity .15s}
+.btn{background:var(--accent);color:#faf7f2;border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:transform .15s,opacity .15s;letter-spacing:.01em}
 .btn:active{transform:scale(.97);opacity:.9}
 .help-link{font-size:12px;color:var(--muted);text-align:center;text-decoration:underline;cursor:pointer;font-family:'DM Mono',monospace}
 
-.header{padding:56px 22px 16px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
-.wordmark{font-size:26px;font-weight:800;color:var(--text)}.wordmark span{color:var(--accent)}
-.greeting{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:2px}
-.icon-btn{width:40px;height:40px;background:var(--surface);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
-.icon-btn:active{background:var(--surface2)}
+/* ── HEADER ── */
+.header{padding:52px 22px 14px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
+.greeting{font-size:12px;color:var(--muted);letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:2px;font-weight:300}
+.wordmark{font-size:28px;font-weight:800;color:var(--text);line-height:1}.wordmark span{color:var(--accent)}
+.icon-btn{width:40px;height:40px;background:#fff;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.icon-btn:active{background:var(--surface)}
 
-.month-card{margin:0 20px 14px;background:var(--accent);border-radius:20px;padding:22px;position:relative;overflow:hidden;flex-shrink:0}
-.month-lbl{font-size:10px;color:rgba(245,240,232,.65);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
-.month-total{font-size:44px;font-weight:800;color:#f5f0e8;letter-spacing:-2px}
-.month-cur{font-size:22px;vertical-align:super}
-.month-count{font-size:11px;color:rgba(245,240,232,.65);font-family:'DM Mono',monospace;margin-top:4px}
+/* ── MONTH CARD ── */
+.month-card{margin:0 18px 16px;background:var(--accent);border-radius:22px;padding:22px 24px;position:relative;overflow:hidden;flex-shrink:0}
+.month-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
+.month-lbl{font-size:10px;color:rgba(250,247,242,.6);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
+.month-total{font-size:46px;font-weight:800;color:#faf7f2;letter-spacing:-2px;line-height:1}
+.month-cur{font-size:22px;vertical-align:super;letter-spacing:0}
+.month-count{font-size:11px;color:rgba(250,247,242,.6);font-family:'DM Mono',monospace;margin-top:6px}
 
-.section-hdr{padding:0 22px;margin-bottom:10px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.cats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 20px;margin-bottom:14px;flex-shrink:0}
-.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .12s}
-.cat-card:active{transform:scale(.94)}
-.cat-icon{font-size:18px;margin-bottom:3px}
-.cat-name{font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
-.cat-amt{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:2px}
+/* ── PIE CHART CARD ── */
+.chart-card{margin:0 18px 16px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:20px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.chart-inner{display:flex;align-items:center;gap:18px}
+#pie-canvas{flex-shrink:0}
+.legend{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0}
+.legend-row{display:flex;align-items:center;gap:7px;cursor:pointer}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-name{font-size:11px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
+.legend-pct{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);flex-shrink:0}
+.chart-empty{text-align:center;padding:24px 0;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px}
 
-.filter-row{display:flex;gap:7px;padding:0 20px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+/* ── SECTION ── */
+.section-hdr{padding:0 20px;margin-bottom:10px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;flex-shrink:0}
+
+/* ── FILTERS ── */
+.filter-row{display:flex;gap:7px;padding:0 18px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .filter-row::-webkit-scrollbar{display:none}
-.fpill{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s}
+.fpill{flex-shrink:0;background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s}
 .fpill.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-.txn-list{flex:1;padding:0 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
-.txn{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+/* ── TXN LIST ── */
+.txn-list{flex:1;padding:0 18px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.txn{background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .txn-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .txn-info{flex:1;min-width:0}
 .txn-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .txn-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
 .txn-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:400;flex-shrink:0}
-.del-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;opacity:.5;flex-shrink:0}
+.del-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;opacity:.4;flex-shrink:0}
 .del-btn:active{opacity:1;color:var(--danger)}
 .empty{text-align:center;padding:48px 20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;line-height:1.9}
-.empty .ico{font-size:40px;display:block;margin-bottom:12px}
+.empty .ico{font-size:36px;display:block;margin-bottom:10px}
 
-.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:22px;width:58px;height:58px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#f5f0e8;cursor:pointer;box-shadow:0 6px 28px rgba(124,92,46,.25);border:none;font-weight:700;line-height:1}
+/* ── FAB ── */
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:20px;width:58px;height:58px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#faf7f2;cursor:pointer;box-shadow:0 4px 20px rgba(139,99,64,.3);border:none;font-weight:700;line-height:1}
 .fab:active{transform:scale(.93)}
 
-.overlay{display:none;position:fixed;inset:0;background:rgba(44,36,22,.45);backdrop-filter:blur(6px);z-index:100;align-items:flex-end}
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(42,31,15,.4);backdrop-filter:blur(6px);z-index:100;align-items:flex-end}
 .overlay.open{display:flex}
-.modal{background:var(--bg);border-radius:26px 26px 0 0;border:1px solid var(--border);border-bottom:none;padding:12px 22px calc(28px + env(safe-area-inset-bottom,0px));width:100%}
+.modal{background:var(--bg);border-radius:28px 28px 0 0;border:1px solid var(--border);border-bottom:none;padding:12px 22px calc(28px + env(safe-area-inset-bottom,0px));width:100%}
 .handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
 .modal-title{font-size:20px;font-weight:800;margin-bottom:16px;color:var(--text)}
 .modal-lbl{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;display:block}
-
 .amt-wrap{position:relative;margin-bottom:14px}
 .amt-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:800;color:var(--accent-light);font-family:'DM Mono',monospace;pointer-events:none}
-#amt-input{width:100%;background:var(--surface);border:2px solid var(--accent-light);border-radius:16px;padding:16px 16px 16px 44px;font-family:'DM Mono',monospace;font-size:32px;font-weight:800;color:var(--accent);outline:none;-webkit-appearance:none;letter-spacing:-1px}
+#amt-input{width:100%;background:#fff;border:2px solid var(--accent-light);border-radius:16px;padding:16px 16px 16px 44px;font-family:'DM Mono',monospace;font-size:32px;font-weight:800;color:var(--accent);outline:none;-webkit-appearance:none;letter-spacing:-1px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 #amt-input:focus{border-color:var(--accent)}
-
 .cat-grid-modal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
-.cbtn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .12s;text-transform:uppercase;letter-spacing:.03em;line-height:1.2;text-align:center}
+.cbtn{background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .12s;text-transform:uppercase;letter-spacing:.03em;line-height:1.2;text-align:center}
 .cbtn .cico{font-size:18px}
 .cbtn.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-#guide{padding:56px 22px 40px;gap:16px;overflow-y:auto}
+/* ── GUIDE ── */
+#guide{padding:56px 22px 40px;gap:16px;overflow-y:auto;background:var(--bg)}
 .gback{font-size:13px;color:var(--accent);cursor:pointer;font-weight:700;margin-bottom:4px}
 .gtitle{font-size:28px;font-weight:800;line-height:1.15;margin-bottom:4px}
-.gstep{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px}
+.gstep{background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .snum{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;font-family:'DM Mono',monospace;margin-bottom:4px}
 .stitle{font-size:14px;font-weight:700;margin-bottom:6px}
 .sdesc{font-size:12px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
-.code-box{background:var(--surface2);border-radius:10px;padding:10px 13px;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);line-height:1.8;word-break:break-all}
+.code-box{background:var(--surface);border-radius:10px;padding:10px 13px;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);line-height:1.8;word-break:break-all}
 
-.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-16px);color:#f5f0e8;border-radius:12px;padding:9px 18px;font-size:12px;font-family:'DM Mono',monospace;white-space:nowrap;opacity:0;transition:all .3s;z-index:200;pointer-events:none}
+/* ── TOAST ── */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-16px);color:#faf7f2;border-radius:12px;padding:9px 18px;font-size:12px;font-family:'DM Mono',monospace;white-space:nowrap;opacity:0;transition:all .3s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--accent)}
 .toast.err{background:var(--danger)}
@@ -119,6 +133,10 @@ input::placeholder{color:var(--muted)}
     <p class="sub" style="margin-top:10px">Connect Notion once. Log transactions in seconds after every Apple Pay tap.</p>
   </div>
   <div>
+    <div class="field-label">Your Name</div>
+    <input id="user-name" type="text" placeholder="Jef" autocomplete="given-name">
+  </div>
+  <div>
     <div class="field-label">Notion API Key</div>
     <input id="nkey" type="password" placeholder="secret_xxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
     <p class="sub" style="margin-top:6px">Notion → Settings → Integrations → New integration</p>
@@ -126,37 +144,46 @@ input::placeholder{color:var(--muted)}
   <div>
     <div class="field-label">Notion Database ID</div>
     <input id="ndb" type="text" placeholder="32-character database ID" autocomplete="off" spellcheck="false">
-    <p class="sub" style="margin-top:6px">From your database URL: notion.so/…/<strong style="color:var(--accent)">DATABASE_ID</strong>?v=…</p>
+    <p class="sub" style="margin-top:6px">notion.so/…/<strong style="color:var(--accent)">DATABASE_ID</strong>?v=…</p>
   </div>
   <div>
     <div class="field-label">Cloudflare Proxy URL</div>
     <input id="proxy-url" type="text" placeholder="https://notion-proxy.yourname.workers.dev" autocomplete="off" spellcheck="false">
-    <p class="sub" style="margin-top:6px">Needed to bypass browser CORS — see guide below</p>
   </div>
   <div>
     <div class="field-label">Currency Symbol</div>
     <input id="cur-sym" type="text" placeholder="$" maxlength="3" style="width:80px">
   </div>
   <button class="btn" onclick="saveSetup()">Connect & Start →</button>
-  <div class="help-link" onclick="goGuide()">📖 Step-by-step Notion + Cloudflare guide</div>
+  <div class="help-link" onclick="goGuide()">📖 Step-by-step setup guide</div>
 </div>
 
 <!-- MAIN -->
 <div id="main" class="screen">
   <div class="header">
     <div>
-      <div class="greeting" id="greeting">Good morning</div>
+      <div class="greeting" id="greeting">Good morning, Jef</div>
       <div class="wordmark">spend<span>ly</span></div>
     </div>
     <div class="icon-btn" onclick="openSettings()">⚙️</div>
   </div>
+
   <div class="month-card">
     <div class="month-lbl" id="mlbl">This month</div>
     <div class="month-total"><span class="month-cur" id="cur-disp">$</span><span id="total">0.00</span></div>
     <div class="month-count" id="txn-count">0 transactions</div>
   </div>
-  <div class="section-hdr">By Category</div>
-  <div class="cats-grid" id="cats-grid"></div>
+
+  <!-- PIE CHART -->
+  <div class="chart-card" id="chart-card">
+    <div class="chart-empty" id="chart-empty">Log your first transaction to see the breakdown</div>
+    <div class="chart-inner" id="chart-inner" style="display:none">
+      <canvas id="pie-canvas" width="120" height="120"></canvas>
+      <div class="legend" id="legend"></div>
+    </div>
+  </div>
+
+  <div class="section-hdr">Transactions</div>
   <div class="filter-row">
     <div class="fpill on" onclick="filt('all',this)">All</div>
     <div class="fpill" onclick="filt('food',this)">🍜 Food</div>
@@ -202,17 +229,17 @@ input::placeholder{color:var(--muted)}
   <div class="gstep">
     <div class="snum">Step 05 — Cloudflare</div>
     <div class="stitle">Create a proxy Worker</div>
-    <div class="sdesc">cloudflare.com → Workers & Pages → Create → Create Worker → name it "notion-proxy" → Deploy → Edit Code → delete all default code → paste the Worker code → Deploy again. Copy the Worker URL.</div>
+    <div class="sdesc">cloudflare.com → Workers & Pages → Create → Create Worker → name it "notion-proxy" → Deploy → Edit Code → delete default code → paste the Worker code → Deploy. Copy the Worker URL.</div>
   </div>
   <div class="gstep">
     <div class="snum">Step 06 — iPhone</div>
     <div class="stitle">Add to Home Screen</div>
-    <div class="sdesc">Open this page in Safari → tap Share → "Add to Home Screen". Opens full-screen like a native app.</div>
+    <div class="sdesc">Safari → Share → "Add to Home Screen". Opens full-screen like a native app.</div>
   </div>
   <div class="gstep">
     <div class="snum">Step 07 — Automation</div>
     <div class="stitle">iOS Shortcuts for Apple Pay</div>
-    <div class="sdesc">Shortcuts app → Automation → + → Apple Pay → Payment completed → Add action: Open URL → paste this app's URL. Spendly opens automatically after every Apple Pay tap.</div>
+    <div class="sdesc">Shortcuts app → Automation → + → Apple Pay → Payment completed → Open URL → paste this app's URL.</div>
   </div>
   <button class="btn" onclick="go('setup')" style="margin-top:4px">← Back to setup</button>
 </div>
@@ -222,19 +249,15 @@ input::placeholder{color:var(--muted)}
   <div class="modal">
     <div class="handle"></div>
     <div class="modal-title">New transaction</div>
-
     <label class="modal-lbl">Amount</label>
     <div class="amt-wrap">
       <span class="amt-prefix" id="mcur">$</span>
       <input id="amt-input" type="number" inputmode="decimal" placeholder="0.00" min="0" step="0.01" autocomplete="off">
     </div>
-
     <label class="modal-lbl">Description</label>
     <input id="txn-name" type="text" placeholder="e.g. Grab to Orchard" style="margin-bottom:14px" autocomplete="off">
-
     <label class="modal-lbl">Category</label>
     <div class="cat-grid-modal" id="cat-row"></div>
-
     <button class="btn" onclick="addTxn()">Log transaction →</button>
     <div style="height:8px"></div>
     <div class="help-link" onclick="closeModal()">Cancel</div>
@@ -245,34 +268,40 @@ input::placeholder{color:var(--muted)}
 
 <script>
 const CATS=[
-  {id:'food',         name:'Food & Drinks',   icon:'🍜', color:'var(--food)'},
-  {id:'shopping',     name:'Shopping',        icon:'🛍️', color:'var(--shopping)'},
-  {id:'travel',       name:'Travel',          icon:'✈️',  color:'var(--travel)'},
-  {id:'services',     name:'Services',        icon:'🔧', color:'var(--services)'},
-  {id:'entertainment',name:'Entertainment',   icon:'🎬', color:'var(--entertainment)'},
-  {id:'health',       name:'Health',          icon:'💊', color:'var(--health)'},
-  {id:'transport',    name:'Transport',       icon:'🚌', color:'var(--transport)'},
-  {id:'misc',         name:'Miscellaneous',   icon:'📦', color:'var(--misc)'},
+  {id:'food',         name:'Food & Drinks',   icon:'🍜', hex:'#c0622a'},
+  {id:'shopping',     name:'Shopping',        icon:'🛍️', hex:'#7a5535'},
+  {id:'travel',       name:'Travel',          icon:'✈️',  hex:'#3a7a6a'},
+  {id:'services',     name:'Services',        icon:'🔧', hex:'#4a6080'},
+  {id:'entertainment',name:'Entertainment',   icon:'🎬', hex:'#7a4a80'},
+  {id:'health',       name:'Health',          icon:'💊', hex:'#3a7a3a'},
+  {id:'transport',    name:'Transport',       icon:'🚌', hex:'#6a6a20'},
+  {id:'misc',         name:'Miscellaneous',   icon:'📦', hex:'#7a6a50'},
 ];
 
-let S={key:'',db:'',proxy:'',cur:'$',txns:[],selCat:'food',filter:'all'};
+const SHORT={
+  'Food & Drinks':'Food','Miscellaneous':'Misc','Entertainment':'Entmt'
+};
+function short(name){return SHORT[name]||name.split(' ')[0]}
+
+let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all'};
 function load(){try{const d=localStorage.getItem('spendly');if(d)S={...S,...JSON.parse(d)}}catch(e){}}
 function save(){localStorage.setItem('spendly',JSON.stringify(S))}
 
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function goGuide(){go('guide')}
-function openSettings(){if(confirm('Disconnect Notion and reset?')){S.key='';S.db='';S.proxy='';save();go('setup')}}
-function greeting(){const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening'}
+function openSettings(){if(confirm('Disconnect Notion and reset?')){S.key='';S.db='';S.proxy='';S.name='';save();go('setup')}}
+function greeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';return S.name?`${g}, ${S.name}`:`${g}`}
 
 function saveSetup(){
   const k=document.getElementById('nkey').value.trim();
   const d=document.getElementById('ndb').value.trim().replace(/-/g,'').substring(0,32);
   const p=document.getElementById('proxy-url').value.trim().replace(/\/$/,'');
   const c=document.getElementById('cur-sym').value.trim()||'$';
+  const n=document.getElementById('user-name').value.trim();
   if(!k.startsWith('secret_')&&!k.startsWith('ntn_')){toast('API key must start with secret_','err');return}
   if(d.length<32){toast('Database ID must be 32 characters','err');return}
   if(!p.startsWith('https://')){toast('Proxy URL must start with https://','err');return}
-  S.key=k;S.db=d;S.proxy=p;S.cur=c;save();
+  S.key=k;S.db=d;S.proxy=p;S.cur=c;S.name=n||'Jef';save();
   go('main');render();toast('Connected to Notion ✓','ok');
 }
 
@@ -287,18 +316,60 @@ function render(){
   const tot=mTxns.reduce((a,t)=>a+t.amount,0);
   document.getElementById('total').textContent=tot.toFixed(2);
   document.getElementById('txn-count').textContent=`${mTxns.length} transaction${mTxns.length!==1?'s':''}`;
-  renderCats(mTxns);renderList();
+  renderChart(mTxns);
+  renderList();
 }
 
-function renderCats(mTxns){
-  const g=document.getElementById('cats-grid');g.innerHTML='';
-  CATS.forEach(c=>{
-    const tot=mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0);
-    const el=document.createElement('div');el.className='cat-card';
-    const label=c.name==='Food & Drinks'?'Food':c.name==='Miscellaneous'?'Misc':c.name==='Entertainment'?'Entmt':c.name.split(' ')[0];
-    el.innerHTML=`<div class="cat-icon">${c.icon}</div><div class="cat-name" style="color:${c.color}">${label}</div><div class="cat-amt">${S.cur}${tot.toFixed(2)}</div>`;
-    el.onclick=()=>{S.filter=c.id;document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));renderList()};
-    g.appendChild(el);
+// ── PIE CHART ──
+function renderChart(mTxns){
+  const total=mTxns.reduce((a,t)=>a+t.amount,0);
+  const chartInner=document.getElementById('chart-inner');
+  const chartEmpty=document.getElementById('chart-empty');
+  if(!total){chartInner.style.display='none';chartEmpty.style.display='block';return}
+  chartInner.style.display='flex';chartEmpty.style.display='none';
+
+  // Build data
+  const data=CATS.map(c=>({
+    cat:c,
+    amt:mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0)
+  })).filter(d=>d.amt>0).sort((a,b)=>b.amt-a.amt);
+
+  // Draw pie
+  const canvas=document.getElementById('pie-canvas');
+  const ctx=canvas.getContext('2d');
+  const cx=60,cy=60,r=52,gap=0.03;
+  ctx.clearRect(0,0,120,120);
+  let angle=-Math.PI/2;
+  data.forEach(d=>{
+    const slice=(d.amt/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,angle+gap/2,angle+slice-gap/2);
+    ctx.closePath();
+    ctx.fillStyle=d.cat.hex;
+    ctx.fill();
+    angle+=slice;
+  });
+  // Centre hole (donut)
+  ctx.beginPath();
+  ctx.arc(cx,cy,32,0,Math.PI*2);
+  ctx.fillStyle='#fff';
+  ctx.fill();
+  // Centre label
+  ctx.fillStyle='#2a1f0f';
+  ctx.font='700 11px Syne,sans-serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText(data.length+' cats',cx,cy);
+
+  // Legend
+  const legend=document.getElementById('legend');legend.innerHTML='';
+  data.forEach(d=>{
+    const pct=Math.round((d.amt/total)*100);
+    const row=document.createElement('div');row.className='legend-row';
+    row.innerHTML=`<div class="legend-dot" style="background:${d.cat.hex}"></div><div class="legend-name" style="color:${d.cat.hex}">${short(d.cat.name)}</div><div class="legend-pct">${pct}%</div>`;
+    row.onclick=()=>{S.filter=d.cat.id;document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));renderList()};
+    legend.appendChild(row);
   });
 }
 
@@ -319,7 +390,7 @@ function renderList(){
     const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
     const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     const el=document.createElement('div');el.className='txn';
-    el.innerHTML=`<div class="txn-ico" style="background:${c.color}18">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.color}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}')">✕</button>`;
+    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}15">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}')">✕</button>`;
     l.appendChild(el);
   });
 }
@@ -331,8 +402,7 @@ function buildCatRow(){
   CATS.forEach(c=>{
     const b=document.createElement('button');
     b.className='cbtn'+(c.id===S.selCat?' on':'');
-    const short=c.name==='Food & Drinks'?'Food':c.name==='Miscellaneous'?'Misc':c.name==='Entertainment'?'Entmt':c.name.split(' ')[0];
-    b.innerHTML=`<span class="cico">${c.icon}</span>${short}`;
+    b.innerHTML=`<span class="cico">${c.icon}</span>${short(c.name)}`;
     b.onclick=()=>{S.selCat=c.id;document.querySelectorAll('.cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on')};
     r.appendChild(b);
   });
