@@ -203,17 +203,17 @@ input::placeholder{color:var(--muted)}
   <div class="section-hdr">Transactions</div>
   <div class="filter-row">
     <div class="fpill on" onclick="filt('all',this)">All</div>
-    <div class="fpill" onclick="filt('food',this)">🍜 Food</div>
-    <div class="fpill" onclick="filt('shopping',this)">🛍 Shopping</div>
-    <div class="fpill" onclick="filt('travel',this)">✈️ Travel</div>
-    <div class="fpill" onclick="filt('services',this)">🔧 Services</div>
-    <div class="fpill" onclick="filt('entertainment',this)">🎬 Entmt</div>
-    <div class="fpill" onclick="filt('health',this)">💊 Health</div>
-    <div class="fpill" onclick="filt('transport',this)">🚌 Transport</div>
-    <div class="fpill" onclick="filt('subscription',this)">🔁 Subs</div>
-    <div class="fpill" onclick="filt('investments',this)">📈 Invest</div>
-    <div class="fpill" onclick="filt('family',this)">🏠 Family</div>
-    <div class="fpill" onclick="filt('misc',this)">📦 Misc</div>
+    <div class="fpill" onclick="filt('food',this)">Food</div>
+    <div class="fpill" onclick="filt('shopping',this)">Shopping</div>
+    <div class="fpill" onclick="filt('travel',this)">Travel</div>
+    <div class="fpill" onclick="filt('services',this)">Services</div>
+    <div class="fpill" onclick="filt('entertainment',this)">Entmt</div>
+    <div class="fpill" onclick="filt('health',this)">Health</div>
+    <div class="fpill" onclick="filt('transport',this)">Transport</div>
+    <div class="fpill" onclick="filt('subscription',this)">Subs</div>
+    <div class="fpill" onclick="filt('investments',this)">Invest</div>
+    <div class="fpill" onclick="filt('family',this)">Family</div>
+    <div class="fpill" onclick="filt('misc',this)">Misc</div>
   </div>
   <div class="txn-list" id="txn-list"></div>
   <div style="height:90px;flex-shrink:0"></div>
@@ -422,27 +422,44 @@ function renderChart(mTxns){
   ci.style.display='flex';ce.style.display='none';
   const data=CATS.map(c=>({cat:c,amt:mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0)}))
     .filter(d=>d.amt>0).sort((a,b)=>b.amt-a.amt);
+  // Retina-safe canvas
   const canvas=document.getElementById('pie-canvas');
+  const dpr=window.devicePixelRatio||1;
+  const SIZE=120;
+  canvas.width=SIZE*dpr;
+  canvas.height=SIZE*dpr;
+  canvas.style.width=SIZE+'px';
+  canvas.style.height=SIZE+'px';
   const ctx=canvas.getContext('2d');
-  const cx=60,cy=60,r=52,gap=0.03;
-  ctx.clearRect(0,0,120,120);
+  ctx.scale(dpr,dpr);
+  const cx=SIZE/2,cy=SIZE/2,r=SIZE/2-2;
+  ctx.clearRect(0,0,SIZE,SIZE);
+  // Draw solid filled slices (no donut, no gap)
   let angle=-Math.PI/2;
   data.forEach(d=>{
     const slice=(d.amt/total)*Math.PI*2;
-    ctx.beginPath();ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,angle+gap/2,angle+slice-gap/2);
-    ctx.closePath();ctx.fillStyle=d.cat.hex;ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,angle,angle+slice);
+    ctx.closePath();
+    ctx.fillStyle=d.cat.hex;
+    ctx.fill();
+    // thin white separator line
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+r*Math.cos(angle),cy+r*Math.sin(angle));
+    ctx.strokeStyle='#faf7f2';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
     angle+=slice;
   });
-  ctx.beginPath();ctx.arc(cx,cy,32,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  ctx.fillStyle='#2a1f0f';ctx.font='700 11px Syne,sans-serif';
-  ctx.textAlign='center';ctx.textBaseline='middle';
-  ctx.fillText(data.length+' cats',cx,cy);
+  // Legend — colour dot + name + amount + pct, no emoji
   const legend=document.getElementById('legend');legend.innerHTML='';
   data.forEach(d=>{
     const pct=Math.round((d.amt/total)*100);
     const row=document.createElement('div');row.className='legend-row';
-    row.innerHTML=`<div class="legend-dot" style="background:${d.cat.hex}"></div><div class="legend-name" style="color:${d.cat.hex}">${short(d.cat.name)}</div><div class="legend-amt">${S.cur}${d.amt.toFixed(0)}</div><div class="legend-pct">${pct}%</div>`;
+    const label=short(d.cat.name).toUpperCase();
+    row.innerHTML=`<div class="legend-dot" style="background:${d.cat.hex}"></div><div class="legend-name" style="color:${d.cat.hex}">${label}</div><div class="legend-amt">${S.cur}${d.amt.toFixed(0)}</div><div class="legend-pct">${pct}%</div>`;
     row.onclick=()=>{S.filter=d.cat.id;document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));renderList()};
     legend.appendChild(row);
   });
@@ -464,7 +481,8 @@ function renderList(){
     const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
     const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     const el=document.createElement('div');el.className='txn';
-    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}15">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
+    const initials=short(c.name).slice(0,2).toUpperCase();
+    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}18"><span style="font-size:11px;font-weight:800;color:${c.hex};font-family:'Syne',sans-serif;letter-spacing:.02em">${initials}</span></div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
     l.appendChild(el);
   });
 }
