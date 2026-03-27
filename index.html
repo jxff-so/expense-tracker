@@ -4,852 +4,377 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Spendly">
-<title>Spendly — Expense Tracker</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>Spendly</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c28;
-    --border: rgba(255,255,255,0.07);
-    --text: #f0f0f5;
-    --muted: #6b6b80;
-    --accent: #c8ff57;
-    --accent-dim: rgba(200,255,87,0.12);
-    --danger: #ff5f5f;
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f5f0e8;--surface:#ede8df;--surface2:#e4ddd2;
+  --border:rgba(100,80,50,0.12);--text:#2c2416;--muted:#9e8e78;
+  --accent:#7c5c2e;--accent-bg:rgba(124,92,46,0.1);
+  --accent-light:#c8a97a;--danger:#c0392b;
+  --food:#b85c2e;--shopping:#7c5c2e;--travel:#4a7c6f;
+  --services:#5a6e8c;--entertainment:#8c5a7c;--health:#4a7c4a;
+  --transport:#6e6e2e;--misc:#7c6e5a;
+}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100dvh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
+.screen{display:none;flex-direction:column;min-height:100dvh}
+.screen.active{display:flex}
 
-    --cat-food: #ff9f43;
-    --cat-transport: #54a0ff;
-    --cat-shopping: #ff6eb4;
-    --cat-entertainment: #a29bfe;
-    --cat-health: #55efc4;
-    --cat-bills: #ffeaa7;
-  }
+#setup{padding:60px 28px 40px;gap:22px;justify-content:center}
+.logo{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
+.big-title{font-size:38px;font-weight:800;line-height:1.05;color:var(--text)}
+.big-title span{color:var(--accent)}
+.sub{font-size:13px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
+.field-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none}
+input:focus{border-color:var(--accent-light)}
+input::placeholder{color:var(--muted)}
+.btn{background:var(--accent);color:#f5f0e8;border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:transform .15s,opacity .15s}
+.btn:active{transform:scale(.97);opacity:.9}
+.help-link{font-size:12px;color:var(--muted);text-align:center;text-decoration:underline;cursor:pointer;font-family:'DM Mono',monospace}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+.header{padding:56px 22px 16px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
+.wordmark{font-size:26px;font-weight:800;color:var(--text)}.wordmark span{color:var(--accent)}
+.greeting{font-size:11px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:2px}
+.icon-btn{width:40px;height:40px;background:var(--surface);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.icon-btn:active{background:var(--surface2)}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    overflow-x: hidden;
-    padding-bottom: env(safe-area-inset-bottom, 20px);
-  }
+.month-card{margin:0 20px 14px;background:var(--accent);border-radius:20px;padding:22px;position:relative;overflow:hidden;flex-shrink:0}
+.month-lbl{font-size:10px;color:rgba(245,240,232,.65);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
+.month-total{font-size:44px;font-weight:800;color:#f5f0e8;letter-spacing:-2px}
+.month-cur{font-size:22px;vertical-align:super}
+.month-count{font-size:11px;color:rgba(245,240,232,.65);font-family:'DM Mono',monospace;margin-top:4px}
 
-  /* ---- NOISE TEXTURE ---- */
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none; z-index: 999; opacity: 0.4;
-  }
+.section-hdr{padding:0 22px;margin-bottom:10px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.cats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 20px;margin-bottom:14px;flex-shrink:0}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:transform .12s}
+.cat-card:active{transform:scale(.94)}
+.cat-icon{font-size:18px;margin-bottom:3px}
+.cat-name{font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
+.cat-amt{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:2px}
 
-  /* ---- SCREENS ---- */
-  .screen { display: none; flex-direction: column; min-height: 100vh; animation: fadeUp 0.35s ease; }
-  .screen.active { display: flex; }
-  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.filter-row{display:flex;gap:7px;padding:0 20px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.filter-row::-webkit-scrollbar{display:none}
+.fpill{flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s}
+.fpill.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-  /* ---- SETUP SCREEN ---- */
-  #setup {
-    padding: 60px 28px 40px;
-    justify-content: center;
-    gap: 28px;
-    background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(200,255,87,0.07) 0%, transparent 70%);
-  }
-  .setup-logo { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
-  .setup-title { font-size: 38px; font-weight: 800; line-height: 1.1; }
-  .setup-title span { color: var(--accent); }
-  .setup-sub { font-size: 14px; color: var(--muted); line-height: 1.6; font-family: 'DM Mono', monospace; font-weight: 300; }
+.txn-list{flex:1;padding:0 20px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
+.txn{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.txn-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.txn-info{flex:1;min-width:0}
+.txn-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txn-sub{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
+.txn-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:400;flex-shrink:0}
+.del-btn{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;opacity:.5;flex-shrink:0}
+.del-btn:active{opacity:1;color:var(--danger)}
+.empty{text-align:center;padding:48px 20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;line-height:1.9}
+.empty .ico{font-size:40px;display:block;margin-bottom:12px}
 
-  .setup-section { display: flex; flex-direction: column; gap: 10px; }
-  .setup-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:22px;width:58px;height:58px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#f5f0e8;cursor:pointer;box-shadow:0 6px 28px rgba(124,92,46,.25);border:none;font-weight:700;line-height:1}
+.fab:active{transform:scale(.93)}
 
-  .input-row { display: flex; gap: 10px; align-items: center; }
-  input[type="text"], input[type="password"] {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: rgba(200,255,87,0.4); }
-  input::placeholder { color: var(--muted); }
+.overlay{display:none;position:fixed;inset:0;background:rgba(44,36,22,.45);backdrop-filter:blur(6px);z-index:100;align-items:flex-end}
+.overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:26px 26px 0 0;border:1px solid var(--border);border-bottom:none;padding:12px 22px calc(28px + env(safe-area-inset-bottom,0px));width:100%}
+.handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:20px;font-weight:800;margin-bottom:16px;color:var(--text)}
+.modal-lbl{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;display:block}
 
-  .btn-primary {
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    border-radius: 14px;
-    padding: 16px 24px;
-    font-family: 'Syne', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    width: 100%;
-    transition: transform 0.15s, opacity 0.15s;
-    letter-spacing: 0.02em;
-  }
-  .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+.amt-wrap{position:relative;margin-bottom:14px}
+.amt-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:800;color:var(--accent-light);font-family:'DM Mono',monospace;pointer-events:none}
+#amt-input{width:100%;background:var(--surface);border:2px solid var(--accent-light);border-radius:16px;padding:16px 16px 16px 44px;font-family:'DM Mono',monospace;font-size:32px;font-weight:800;color:var(--accent);outline:none;-webkit-appearance:none;letter-spacing:-1px}
+#amt-input:focus{border-color:var(--accent)}
 
-  .help-link {
-    font-size: 12px;
-    color: var(--muted);
-    text-align: center;
-    text-decoration: underline;
-    cursor: pointer;
-    font-family: 'DM Mono', monospace;
-  }
+.cat-grid-modal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
+.cbtn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px 4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .12s;text-transform:uppercase;letter-spacing:.03em;line-height:1.2;text-align:center}
+.cbtn .cico{font-size:18px}
+.cbtn.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-  /* ---- MAIN SCREEN ---- */
-  #main { padding: 0; }
+#guide{padding:56px 22px 40px;gap:16px;overflow-y:auto}
+.gback{font-size:13px;color:var(--accent);cursor:pointer;font-weight:700;margin-bottom:4px}
+.gtitle{font-size:28px;font-weight:800;line-height:1.15;margin-bottom:4px}
+.gstep{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px}
+.snum{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);font-weight:700;font-family:'DM Mono',monospace;margin-bottom:4px}
+.stitle{font-size:14px;font-weight:700;margin-bottom:6px}
+.sdesc{font-size:12px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
+.code-box{background:var(--surface2);border-radius:10px;padding:10px 13px;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);line-height:1.8;word-break:break-all}
 
-  .header {
-    padding: 56px 24px 20px;
-    background: linear-gradient(to bottom, rgba(200,255,87,0.05) 0%, transparent 100%);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-  .header-left .greeting { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; font-family: 'DM Mono', monospace; }
-  .header-left .app-name { font-size: 28px; font-weight: 800; }
-  .header-left .app-name span { color: var(--accent); }
-
-  .settings-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px;
-    transition: background 0.2s;
-  }
-  .settings-btn:active { background: var(--surface2); }
-
-  /* MONTH TOTAL */
-  .month-card {
-    margin: 0 20px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-  }
-  .month-card::after {
-    content: '';
-    position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
-    background: radial-gradient(circle, rgba(200,255,87,0.15), transparent 70%);
-    pointer-events: none;
-  }
-  .month-label { font-size: 11px; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; font-family: 'DM Mono', monospace; margin-bottom: 6px; }
-  .month-total { font-size: 42px; font-weight: 800; color: var(--accent); letter-spacing: -1px; }
-  .month-total .currency { font-size: 22px; font-weight: 600; vertical-align: super; margin-right: 2px; }
-  .month-count { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 4px; }
-
-  /* CATEGORIES */
-  .section-header { padding: 0 24px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-  .section-title { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-
-  .cats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 20px; margin-bottom: 20px; }
-  .cat-pill {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.15s, border-color 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .cat-pill:active { transform: scale(0.95); }
-  .cat-pill.selected { border-color: currentColor; }
-  .cat-icon { font-size: 22px; margin-bottom: 4px; }
-  .cat-name { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
-  .cat-amount { font-size: 10px; font-family: 'DM Mono', monospace; margin-top: 2px; color: var(--muted); }
-
-  [data-cat="food"] { color: var(--cat-food); }
-  [data-cat="transport"] { color: var(--cat-transport); }
-  [data-cat="shopping"] { color: var(--cat-shopping); }
-  [data-cat="entertainment"] { color: var(--cat-entertainment); }
-  [data-cat="health"] { color: var(--cat-health); }
-  [data-cat="bills"] { color: var(--cat-bills); }
-
-  /* TRANSACTIONS */
-  .txn-list { padding: 0 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .txn-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    animation: fadeUp 0.3s ease;
-  }
-  .txn-icon {
-    width: 40px; height: 40px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .txn-info { flex: 1; min-width: 0; }
-  .txn-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .txn-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
-  .txn-amount { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; flex-shrink: 0; }
-  .txn-delete { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px; flex-shrink: 0; opacity: 0.5; }
-  .txn-delete:active { opacity: 1; color: var(--danger); }
-
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; }
-  .empty-state .big { font-size: 36px; margin-bottom: 12px; }
-
-  /* FAB */
-  .fab {
-    position: fixed;
-    bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-    right: 24px;
-    width: 60px; height: 60px;
-    background: var(--accent);
-    border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px;
-    color: #0a0a0f;
-    cursor: pointer;
-    box-shadow: 0 8px 30px rgba(200,255,87,0.35);
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: none;
-    font-weight: 700;
-    line-height: 1;
-  }
-  .fab:active { transform: scale(0.93); box-shadow: 0 4px 15px rgba(200,255,87,0.2); }
-
-  /* ---- ADD MODAL ---- */
-  .modal-overlay {
-    display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    z-index: 100;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 28px 28px 0 0;
-    padding: 12px 24px calc(32px + env(safe-area-inset-bottom, 0px));
-    width: 100%;
-    animation: slideUp 0.35s cubic-bezier(0.16,1,0.3,1);
-  }
-  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; }
-
-  .amount-display {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px;
-    text-align: center;
-    margin-bottom: 16px;
-  }
-  .amount-display .prefix { font-size: 20px; color: var(--muted); vertical-align: super; }
-  .amount-display #amount-val { font-size: 42px; font-weight: 800; font-family: 'DM Mono', monospace; color: var(--accent); letter-spacing: -1px; }
-
-  .modal-input { margin-bottom: 14px; }
-  .modal-input label { font-size: 11px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600; display: block; margin-bottom: 6px; }
-
-  .cat-select-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -ms-overflow-style: none; scrollbar-width: none; }
-  .cat-select-row::-webkit-scrollbar { display: none; }
-  .cat-btn {
-    flex-shrink: 0;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px 14px;
-    font-family: 'Syne', sans-serif;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: all 0.15s;
-  }
-  .cat-btn.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(200,255,87,0.3); }
-
-  /* NUMPAD */
-  .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-  .num-btn {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    height: 52px;
-    font-family: 'DM Mono', monospace;
-    font-size: 20px;
-    color: var(--text);
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.1s;
-    border: none;
-  }
-  .num-btn:active { background: var(--surface2); }
-  .num-btn.del { font-size: 16px; }
-
-  /* STATUS TOAST */
-  .toast {
-    position: fixed;
-    top: 60px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-family: 'DM Mono', monospace;
-    white-space: nowrap;
-    opacity: 0;
-    transition: all 0.3s;
-    z-index: 200;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: rgba(200,255,87,0.3); color: var(--accent); }
-  .toast.error { border-color: rgba(255,95,95,0.3); color: var(--danger); }
-
-  /* GUIDE SCREEN */
-  #guide { padding: 56px 24px 40px; gap: 20px; overflow-y: auto; }
-  .guide-back { font-size: 13px; color: var(--accent); cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-weight: 600; }
-  .guide-title { font-size: 28px; font-weight: 800; line-height: 1.2; }
-  .guide-step {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 18px;
-  }
-  .step-num { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 6px; font-family: 'DM Mono', monospace; }
-  .step-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
-  .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; font-family: 'DM Mono', monospace; font-weight: 300; }
-  .step-code {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin-top: 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    line-height: 1.7;
-    word-break: break-all;
-  }
-  .copy-btn {
-    background: var(--accent-dim);
-    border: 1px solid rgba(200,255,87,0.2);
-    border-radius: 8px;
-    padding: 6px 12px;
-    color: var(--accent);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    cursor: pointer;
-    margin-top: 8px;
-    display: inline-block;
-  }
-  .copy-btn:active { opacity: 0.7; }
-
-  .filter-bar { display: flex; gap: 8px; padding: 0 20px; margin-bottom: 16px; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
-  .filter-bar::-webkit-scrollbar { display: none; }
-  .filter-pill {
-    flex-shrink: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 6px 14px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .filter-pill.active { background: var(--accent-dim); color: var(--accent); border-color: rgba(200,255,87,0.3); }
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-16px);color:#f5f0e8;border-radius:12px;padding:9px 18px;font-size:12px;font-family:'DM Mono',monospace;white-space:nowrap;opacity:0;transition:all .3s;z-index:200;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--accent)}
+.toast.err{background:var(--danger)}
 </style>
 </head>
 <body>
 
-<!-- SETUP SCREEN -->
+<!-- SETUP -->
 <div id="setup" class="screen active">
-  <div class="setup-logo">⚡ Spendly</div>
+  <div class="logo">⚡ Spendly</div>
   <div>
-    <div class="setup-title">Track every<br><span>dollar.</span></div>
-    <div class="setup-sub" style="margin-top:10px;">Connect your Notion workspace once, then every transaction logs automatically.</div>
+    <div class="big-title">Track every<br><span>dollar.</span></div>
+    <p class="sub" style="margin-top:10px">Connect Notion once. Log transactions in seconds after every Apple Pay tap.</p>
   </div>
-
-  <div class="setup-section">
-    <div class="setup-label">Notion API Key</div>
-    <input type="password" id="notion-key" placeholder="secret_xxxxxxxxxxxxxxxx" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="setup-sub">From Notion → Settings → Integrations → New integration</div>
+  <div>
+    <div class="field-label">Notion API Key</div>
+    <input id="nkey" type="password" placeholder="secret_xxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+    <p class="sub" style="margin-top:6px">Notion → Settings → Integrations → New integration</p>
   </div>
-
-  <div class="setup-section">
-    <div class="setup-label">Notion Database ID</div>
-    <input type="text" id="notion-db" placeholder="32-character database ID" autocomplete="off" autocorrect="off" spellcheck="false">
-    <div class="setup-sub">The ID from your database URL: notion.so/your-workspace/<strong style="color:var(--accent)">DATABASE_ID</strong>?v=...</div>
+  <div>
+    <div class="field-label">Notion Database ID</div>
+    <input id="ndb" type="text" placeholder="32-character database ID" autocomplete="off" spellcheck="false">
+    <p class="sub" style="margin-top:6px">From your database URL: notion.so/…/<strong style="color:var(--accent)">DATABASE_ID</strong>?v=…</p>
   </div>
-
-  <div class="setup-section">
-    <div class="setup-label">Your Currency Symbol</div>
-    <input type="text" id="currency-symbol" placeholder="$" maxlength="3" style="width:80px">
+  <div>
+    <div class="field-label">Cloudflare Proxy URL</div>
+    <input id="proxy-url" type="text" placeholder="https://notion-proxy.yourname.workers.dev" autocomplete="off" spellcheck="false">
+    <p class="sub" style="margin-top:6px">Needed to bypass browser CORS — see guide below</p>
   </div>
-
-  <button class="btn-primary" onclick="saveSetup()">Connect & Start Tracking →</button>
-  <div class="help-link" onclick="showGuide()">📖 How do I find these? Step-by-step guide</div>
+  <div>
+    <div class="field-label">Currency Symbol</div>
+    <input id="cur-sym" type="text" placeholder="$" maxlength="3" style="width:80px">
+  </div>
+  <button class="btn" onclick="saveSetup()">Connect & Start →</button>
+  <div class="help-link" onclick="goGuide()">📖 Step-by-step Notion + Cloudflare guide</div>
 </div>
 
-<!-- MAIN SCREEN -->
+<!-- MAIN -->
 <div id="main" class="screen">
   <div class="header">
-    <div class="header-left">
-      <div class="greeting" id="greeting-text">Good morning</div>
-      <div class="app-name">spend<span>ly</span></div>
+    <div>
+      <div class="greeting" id="greeting">Good morning</div>
+      <div class="wordmark">spend<span>ly</span></div>
     </div>
-    <div class="settings-btn" onclick="openSettings()">⚙️</div>
+    <div class="icon-btn" onclick="openSettings()">⚙️</div>
   </div>
-
   <div class="month-card">
-    <div class="month-label" id="month-label">This month</div>
-    <div class="month-total"><span class="currency" id="currency-disp">$</span><span id="total-amount">0.00</span></div>
+    <div class="month-lbl" id="mlbl">This month</div>
+    <div class="month-total"><span class="month-cur" id="cur-disp">$</span><span id="total">0.00</span></div>
     <div class="month-count" id="txn-count">0 transactions</div>
   </div>
-
-  <div class="section-header"><div class="section-title">By Category</div></div>
+  <div class="section-hdr">By Category</div>
   <div class="cats-grid" id="cats-grid"></div>
-
-  <div class="section-header">
-    <div class="section-title">Recent</div>
+  <div class="filter-row">
+    <div class="fpill on" onclick="filt('all',this)">All</div>
+    <div class="fpill" onclick="filt('food',this)">🍜 Food</div>
+    <div class="fpill" onclick="filt('shopping',this)">🛍 Shopping</div>
+    <div class="fpill" onclick="filt('travel',this)">✈️ Travel</div>
+    <div class="fpill" onclick="filt('services',this)">🔧 Services</div>
+    <div class="fpill" onclick="filt('entertainment',this)">🎬 Entmt</div>
+    <div class="fpill" onclick="filt('health',this)">💊 Health</div>
+    <div class="fpill" onclick="filt('transport',this)">🚌 Transport</div>
+    <div class="fpill" onclick="filt('misc',this)">📦 Misc</div>
   </div>
-
-  <div class="filter-bar" id="filter-bar">
-    <div class="filter-pill active" data-filter="all" onclick="setFilter('all', this)">All</div>
-    <div class="filter-pill" data-filter="food" onclick="setFilter('food', this)">🍜 Food</div>
-    <div class="filter-pill" data-filter="transport" onclick="setFilter('transport', this)">🚌 Transport</div>
-    <div class="filter-pill" data-filter="shopping" onclick="setFilter('shopping', this)">🛍️ Shopping</div>
-    <div class="filter-pill" data-filter="entertainment" onclick="setFilter('entertainment', this)">🎬 Entertainment</div>
-    <div class="filter-pill" data-filter="health" onclick="setFilter('health', this)">💊 Health</div>
-    <div class="filter-pill" data-filter="bills" onclick="setFilter('bills', this)">💡 Bills</div>
-  </div>
-
   <div class="txn-list" id="txn-list"></div>
-  <div style="height: 100px;"></div>
-
-  <button class="fab" onclick="openAddModal()">+</button>
+  <div style="height:90px;flex-shrink:0"></div>
+  <button class="fab" onclick="openModal()">+</button>
 </div>
 
-<!-- GUIDE SCREEN -->
+<!-- GUIDE -->
 <div id="guide" class="screen">
-  <div class="guide-back" onclick="showScreen('setup')">← Back</div>
-  <div class="guide-title">Setting Up Notion Integration</div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 01</div>
-    <div class="step-title">Create a Notion Integration</div>
-    <div class="step-desc">Go to notion.so → Click your workspace name (top left) → Settings → Integrations → Create new integration. Give it a name like "Spendly". Copy the Internal Integration Token.</div>
+  <div class="gback" onclick="go('setup')">← Back to setup</div>
+  <div class="gtitle">Setup Guide</div>
+  <div class="gstep">
+    <div class="snum">Step 01 — Notion</div>
+    <div class="stitle">Create a Notion integration</div>
+    <div class="sdesc">notion.so → workspace name top-left → Settings → Integrations → Create new integration → name it "Spendly" → copy the token.</div>
   </div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 02</div>
-    <div class="step-title">Create a Database in Notion</div>
-    <div class="step-desc">Create a new page in Notion. Type /database and choose "Table – Full page". Name it "Expenses". Add these columns:</div>
-    <div class="step-code">
-      Name → Title (default)<br>
-      Amount → Number<br>
-      Category → Select<br>
-      Date → Date<br>
-      Notes → Text
-    </div>
+  <div class="gstep">
+    <div class="snum">Step 02 — Notion</div>
+    <div class="stitle">Create the expenses database</div>
+    <div class="sdesc">New Notion page → /database → Table – Full page → name it "Expenses". Add these columns:</div>
+    <div class="code-box">Name → Title (default)<br>Amount → Number<br>Category → Select<br>Date → Date<br>Notes → Text</div>
   </div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 03</div>
-    <div class="step-title">Connect Integration to Database</div>
-    <div class="step-desc">Open the database page → Click ••• (top right) → Add connections → Search for your integration name → Click to connect.</div>
+  <div class="gstep">
+    <div class="snum">Step 03 — Notion</div>
+    <div class="stitle">Connect integration to database</div>
+    <div class="sdesc">Open the database → ••• top-right → Connections → search "Spendly" → connect.</div>
   </div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 04</div>
-    <div class="step-title">Find Your Database ID</div>
-    <div class="step-desc">Open the database in your browser. The URL looks like:</div>
-    <div class="step-code">notion.so/workspace/<span style="color:var(--text)">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</span>?v=...</div>
-    <div class="step-desc" style="margin-top:8px;">Copy the 32-character ID between the last / and the ?</div>
+  <div class="gstep">
+    <div class="snum">Step 04 — Notion</div>
+    <div class="stitle">Find your Database ID</div>
+    <div class="code-box">notion.so/workspace/<span style="color:var(--text)">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span>?v=…</div>
+    <div class="sdesc" style="margin-top:8px">32 characters between the last / and the ?</div>
   </div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 05 — Apple Pay Automation</div>
-    <div class="step-title">Set Up iOS Shortcuts</div>
-    <div class="step-desc">Open the Shortcuts app → Automation tab → + New Automation → Apple Pay → When payment is completed. Then add a "Open App" action to open Spendly (saved to Home Screen). This will prompt you to log the transaction immediately after paying.</div>
+  <div class="gstep">
+    <div class="snum">Step 05 — Cloudflare</div>
+    <div class="stitle">Create a proxy Worker</div>
+    <div class="sdesc">cloudflare.com → Workers & Pages → Create → Create Worker → name it "notion-proxy" → Deploy → Edit Code → delete all default code → paste the Worker code → Deploy again. Copy the Worker URL.</div>
   </div>
-
-  <div class="guide-step">
-    <div class="step-num">Step 06 — Add to Home Screen</div>
-    <div class="step-title">Install as iPhone App</div>
-    <div class="step-desc">In Safari, open this page → Tap Share button → "Add to Home Screen". Spendly will appear as a full-screen app icon.</div>
+  <div class="gstep">
+    <div class="snum">Step 06 — iPhone</div>
+    <div class="stitle">Add to Home Screen</div>
+    <div class="sdesc">Open this page in Safari → tap Share → "Add to Home Screen". Opens full-screen like a native app.</div>
   </div>
-
-  <button class="btn-primary" onclick="showScreen('setup')" style="margin-top:8px;">← Back to Setup</button>
+  <div class="gstep">
+    <div class="snum">Step 07 — Automation</div>
+    <div class="stitle">iOS Shortcuts for Apple Pay</div>
+    <div class="sdesc">Shortcuts app → Automation → + → Apple Pay → Payment completed → Add action: Open URL → paste this app's URL. Spendly opens automatically after every Apple Pay tap.</div>
+  </div>
+  <button class="btn" onclick="go('setup')" style="margin-top:4px">← Back to setup</button>
 </div>
 
 <!-- ADD MODAL -->
-<div class="modal-overlay" id="add-modal">
+<div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">New Transaction</div>
+    <div class="handle"></div>
+    <div class="modal-title">New transaction</div>
 
-    <div class="amount-display">
-      <span class="prefix" id="modal-currency">$</span><span id="amount-val">0</span>
+    <label class="modal-lbl">Amount</label>
+    <div class="amt-wrap">
+      <span class="amt-prefix" id="mcur">$</span>
+      <input id="amt-input" type="number" inputmode="decimal" placeholder="0.00" min="0" step="0.01" autocomplete="off">
     </div>
 
-    <div class="numpad">
-      <button class="num-btn" onclick="numPress('1')">1</button>
-      <button class="num-btn" onclick="numPress('2')">2</button>
-      <button class="num-btn" onclick="numPress('3')">3</button>
-      <button class="num-btn" onclick="numPress('4')">4</button>
-      <button class="num-btn" onclick="numPress('5')">5</button>
-      <button class="num-btn" onclick="numPress('6')">6</button>
-      <button class="num-btn" onclick="numPress('7')">7</button>
-      <button class="num-btn" onclick="numPress('8')">8</button>
-      <button class="num-btn" onclick="numPress('9')">9</button>
-      <button class="num-btn" onclick="numPress('.')">.</button>
-      <button class="num-btn" onclick="numPress('0')">0</button>
-      <button class="num-btn del" onclick="numDel()">⌫</button>
-    </div>
+    <label class="modal-lbl">Description</label>
+    <input id="txn-name" type="text" placeholder="e.g. Grab to Orchard" style="margin-bottom:14px" autocomplete="off">
 
-    <div class="modal-input">
-      <label>Description</label>
-      <input type="text" id="txn-name" placeholder="e.g. Grab to work" autocomplete="off">
-    </div>
+    <label class="modal-lbl">Category</label>
+    <div class="cat-grid-modal" id="cat-row"></div>
 
-    <div class="modal-input">
-      <label>Category</label>
-      <div class="cat-select-row" id="cat-select-row"></div>
-    </div>
-
-    <button class="btn-primary" onclick="addTransaction()" id="add-btn">Log Transaction →</button>
-    <div style="height:10px;"></div>
+    <button class="btn" onclick="addTxn()">Log transaction →</button>
+    <div style="height:8px"></div>
     <div class="help-link" onclick="closeModal()">Cancel</div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-const CATS = [
-  { id: 'food', name: 'Food & Dining', icon: '🍜', color: 'var(--cat-food)' },
-  { id: 'transport', name: 'Transport', icon: '🚌', color: 'var(--cat-transport)' },
-  { id: 'shopping', name: 'Shopping', icon: '🛍️', color: 'var(--cat-shopping)' },
-  { id: 'entertainment', name: 'Entertainment', icon: '🎬', color: 'var(--cat-entertainment)' },
-  { id: 'health', name: 'Health', icon: '💊', color: 'var(--cat-health)' },
-  { id: 'bills', name: 'Bills & Utilities', icon: '💡', color: 'var(--cat-bills)' },
+const CATS=[
+  {id:'food',         name:'Food & Drinks',   icon:'🍜', color:'var(--food)'},
+  {id:'shopping',     name:'Shopping',        icon:'🛍️', color:'var(--shopping)'},
+  {id:'travel',       name:'Travel',          icon:'✈️',  color:'var(--travel)'},
+  {id:'services',     name:'Services',        icon:'🔧', color:'var(--services)'},
+  {id:'entertainment',name:'Entertainment',   icon:'🎬', color:'var(--entertainment)'},
+  {id:'health',       name:'Health',          icon:'💊', color:'var(--health)'},
+  {id:'transport',    name:'Transport',       icon:'🚌', color:'var(--transport)'},
+  {id:'misc',         name:'Miscellaneous',   icon:'📦', color:'var(--misc)'},
 ];
 
-let state = {
-  notionKey: '',
-  notionDb: '',
-  currency: '$',
-  transactions: [],
-  selectedCat: 'food',
-  amountStr: '0',
-  activeFilter: 'all',
-};
+let S={key:'',db:'',proxy:'',cur:'$',txns:[],selCat:'food',filter:'all'};
+function load(){try{const d=localStorage.getItem('spendly');if(d)S={...S,...JSON.parse(d)}}catch(e){}}
+function save(){localStorage.setItem('spendly',JSON.stringify(S))}
 
-// ---- INIT ----
-function init() {
-  const saved = localStorage.getItem('spendly_state');
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      state = { ...state, ...parsed };
-    } catch(e) {}
-  }
-  updateGreeting();
-  if (state.notionKey && state.notionDb) {
-    showScreen('main');
-    renderMain();
-  } else {
-    showScreen('setup');
-  }
-  buildCatSelectRow();
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function goGuide(){go('guide')}
+function openSettings(){if(confirm('Disconnect Notion and reset?')){S.key='';S.db='';S.proxy='';save();go('setup')}}
+function greeting(){const h=new Date().getHours();return h<12?'Good morning':h<17?'Good afternoon':'Good evening'}
+
+function saveSetup(){
+  const k=document.getElementById('nkey').value.trim();
+  const d=document.getElementById('ndb').value.trim().replace(/-/g,'').substring(0,32);
+  const p=document.getElementById('proxy-url').value.trim().replace(/\/$/,'');
+  const c=document.getElementById('cur-sym').value.trim()||'$';
+  if(!k.startsWith('secret_')&&!k.startsWith('ntn_')){toast('API key must start with secret_','err');return}
+  if(d.length<32){toast('Database ID must be 32 characters','err');return}
+  if(!p.startsWith('https://')){toast('Proxy URL must start with https://','err');return}
+  S.key=k;S.db=d;S.proxy=p;S.cur=c;save();
+  go('main');render();toast('Connected to Notion ✓','ok');
 }
 
-function saveState() {
-  localStorage.setItem('spendly_state', JSON.stringify(state));
+function render(){
+  document.getElementById('greeting').textContent=greeting();
+  document.getElementById('cur-disp').textContent=S.cur;
+  document.getElementById('mcur').textContent=S.cur;
+  const now=new Date();
+  const mo=now.getMonth(),yr=now.getFullYear();
+  document.getElementById('mlbl').textContent=now.toLocaleString('default',{month:'long',year:'numeric'});
+  const mTxns=S.txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===mo&&d.getFullYear()===yr});
+  const tot=mTxns.reduce((a,t)=>a+t.amount,0);
+  document.getElementById('total').textContent=tot.toFixed(2);
+  document.getElementById('txn-count').textContent=`${mTxns.length} transaction${mTxns.length!==1?'s':''}`;
+  renderCats(mTxns);renderList();
 }
 
-// ---- SCREENS ----
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function showGuide() { showScreen('guide'); }
-function openSettings() {
-  if (confirm('Reset Notion connection?')) {
-    state.notionKey = '';
-    state.notionDb = '';
-    saveState();
-    showScreen('setup');
-  }
-}
-
-// ---- SETUP ----
-function saveSetup() {
-  const key = document.getElementById('notion-key').value.trim();
-  const db = document.getElementById('notion-db').value.trim().replace(/-/g, '').substring(0,32);
-  const cur = document.getElementById('currency-symbol').value.trim() || '$';
-  if (!key.startsWith('secret_') && !key.startsWith('ntn_')) {
-    showToast('API key should start with secret_', 'error'); return;
-  }
-  if (db.length < 32) {
-    showToast('Database ID should be 32 characters', 'error'); return;
-  }
-  state.notionKey = key;
-  state.notionDb = db;
-  state.currency = cur;
-  saveState();
-  showScreen('main');
-  renderMain();
-  showToast('Connected to Notion ✓', 'success');
-}
-
-// ---- MAIN RENDER ----
-function renderMain() {
-  document.getElementById('currency-disp').textContent = state.currency;
-  document.getElementById('modal-currency').textContent = state.currency;
-
-  const now = new Date();
-  const monthStr = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-  document.getElementById('month-label').textContent = monthStr;
-
-  const month = now.getMonth(), year = now.getFullYear();
-  const monthTxns = state.transactions.filter(t => {
-    const d = new Date(t.date);
-    return d.getMonth() === month && d.getFullYear() === year;
-  });
-
-  const total = monthTxns.reduce((s, t) => s + t.amount, 0);
-  document.getElementById('total-amount').textContent = total.toFixed(2);
-  document.getElementById('txn-count').textContent = `${monthTxns.length} transaction${monthTxns.length !== 1 ? 's' : ''}`;
-
-  renderCatGrid(monthTxns);
-  renderTxnList();
-}
-
-function renderCatGrid(txns) {
-  const grid = document.getElementById('cats-grid');
-  grid.innerHTML = '';
-  CATS.forEach(cat => {
-    const catTxns = txns.filter(t => t.category === cat.id);
-    const total = catTxns.reduce((s,t) => s + t.amount, 0);
-    const el = document.createElement('div');
-    el.className = 'cat-pill';
-    el.setAttribute('data-cat', cat.id);
-    el.innerHTML = `
-      <div class="cat-icon">${cat.icon}</div>
-      <div class="cat-name">${cat.name.split(' ')[0]}</div>
-      <div class="cat-amount">${state.currency}${total.toFixed(2)}</div>
-    `;
-    el.onclick = () => { setFilter(cat.id, null); };
-    grid.appendChild(el);
+function renderCats(mTxns){
+  const g=document.getElementById('cats-grid');g.innerHTML='';
+  CATS.forEach(c=>{
+    const tot=mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0);
+    const el=document.createElement('div');el.className='cat-card';
+    const label=c.name==='Food & Drinks'?'Food':c.name==='Miscellaneous'?'Misc':c.name==='Entertainment'?'Entmt':c.name.split(' ')[0];
+    el.innerHTML=`<div class="cat-icon">${c.icon}</div><div class="cat-name" style="color:${c.color}">${label}</div><div class="cat-amt">${S.cur}${tot.toFixed(2)}</div>`;
+    el.onclick=()=>{S.filter=c.id;document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));renderList()};
+    g.appendChild(el);
   });
 }
 
-function renderTxnList() {
-  const list = document.getElementById('txn-list');
-  let txns = [...state.transactions].reverse();
-  if (state.activeFilter !== 'all') {
-    txns = txns.filter(t => t.category === state.activeFilter);
-  }
+function filt(id,el){
+  S.filter=id;
+  document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  renderList();
+}
 
-  if (txns.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="big">💸</div>No transactions yet.<br>Tap + to log your first one.</div>`;
-    return;
-  }
-
-  list.innerHTML = '';
-  txns.forEach((t, i) => {
-    const cat = CATS.find(c => c.id === t.category) || CATS[0];
-    const dateStr = new Date(t.date).toLocaleDateString('en-SG', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
-    const el = document.createElement('div');
-    el.className = 'txn-item';
-    el.innerHTML = `
-      <div class="txn-icon" style="background:${cat.color}22;">${cat.icon}</div>
-      <div class="txn-info">
-        <div class="txn-name">${t.name || cat.name}</div>
-        <div class="txn-meta">${cat.name} · ${dateStr}</div>
-      </div>
-      <div class="txn-amount" style="color:${cat.color};">${state.currency}${t.amount.toFixed(2)}</div>
-      <button class="txn-delete" onclick="deleteTransaction('${t.id}')">✕</button>
-    `;
-    list.appendChild(el);
+function renderList(){
+  const l=document.getElementById('txn-list');
+  let txns=[...S.txns].reverse();
+  if(S.filter!=='all')txns=txns.filter(t=>t.category===S.filter);
+  if(!txns.length){l.innerHTML=`<div class="empty"><span class="ico">💸</span>No transactions yet.<br>Tap + to log your first one.</div>`;return}
+  l.innerHTML='';
+  txns.forEach(t=>{
+    const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
+    const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    const el=document.createElement('div');el.className='txn';
+    el.innerHTML=`<div class="txn-ico" style="background:${c.color}18">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.color}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}')">✕</button>`;
+    l.appendChild(el);
   });
 }
 
-function setFilter(cat, el) {
-  state.activeFilter = cat;
-  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-  const pill = document.querySelector(`.filter-pill[data-filter="${cat}"]`);
-  if (pill) pill.classList.add('active');
-  renderTxnList();
-}
+function delTxn(id){if(!confirm('Delete this transaction?'))return;S.txns=S.txns.filter(t=>t.id!==id);save();render()}
 
-function deleteTransaction(id) {
-  if (!confirm('Delete this transaction?')) return;
-  state.transactions = state.transactions.filter(t => t.id !== id);
-  saveState();
-  renderMain();
-}
-
-// ---- GREETING ----
-function updateGreeting() {
-  const h = new Date().getHours();
-  const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
-  const el = document.getElementById('greeting-text');
-  if (el) el.textContent = g;
-}
-
-// ---- MODAL ----
-function buildCatSelectRow() {
-  const row = document.getElementById('cat-select-row');
-  if (!row) return;
-  row.innerHTML = '';
-  CATS.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (cat.id === state.selectedCat ? ' active' : '');
-    btn.innerHTML = `${cat.icon} ${cat.name.split(' ')[0]}`;
-    btn.onclick = () => {
-      state.selectedCat = cat.id;
-      document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    };
-    row.appendChild(btn);
+function buildCatRow(){
+  const r=document.getElementById('cat-row');r.innerHTML='';
+  CATS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='cbtn'+(c.id===S.selCat?' on':'');
+    const short=c.name==='Food & Drinks'?'Food':c.name==='Miscellaneous'?'Misc':c.name==='Entertainment'?'Entmt':c.name.split(' ')[0];
+    b.innerHTML=`<span class="cico">${c.icon}</span>${short}`;
+    b.onclick=()=>{S.selCat=c.id;document.querySelectorAll('.cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on')};
+    r.appendChild(b);
   });
 }
 
-function openAddModal() {
-  state.amountStr = '0';
-  document.getElementById('amount-val').textContent = '0';
-  document.getElementById('txn-name').value = '';
-  buildCatSelectRow();
-  document.getElementById('add-modal').classList.add('open');
+function openModal(){
+  document.getElementById('amt-input').value='';
+  document.getElementById('txn-name').value='';
+  buildCatRow();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('amt-input').focus(),300);
 }
-function closeModal() {
-  document.getElementById('add-modal').classList.remove('open');
-}
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
 
-// Numpad
-function numPress(v) {
-  let s = state.amountStr;
-  if (v === '.' && s.includes('.')) return;
-  if (s === '0' && v !== '.') s = v;
-  else s += v;
-  if (s.includes('.')) {
-    const parts = s.split('.');
-    if (parts[1].length > 2) return;
-  }
-  if (s.length > 8) return;
-  state.amountStr = s;
-  document.getElementById('amount-val').textContent = s;
-}
-function numDel() {
-  let s = state.amountStr;
-  s = s.length > 1 ? s.slice(0,-1) : '0';
-  state.amountStr = s;
-  document.getElementById('amount-val').textContent = s;
+async function addTxn(){
+  const amount=parseFloat(document.getElementById('amt-input').value);
+  if(!amount||amount<=0){toast('Enter an amount','err');return}
+  const name=document.getElementById('txn-name').value.trim();
+  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  const txn={id,amount,name:name||(CATS.find(c=>c.id===S.selCat)?.name||''),category:S.selCat,date:new Date().toISOString()};
+  S.txns.push(txn);save();closeModal();render();toast('Saved locally ✓','ok');
+  await pushNotion(txn);
 }
 
-// ---- ADD TRANSACTION ----
-async function addTransaction() {
-  const amount = parseFloat(state.amountStr);
-  if (!amount || amount <= 0) { showToast('Enter an amount', 'error'); return; }
-  const name = document.getElementById('txn-name').value.trim();
-  const cat = state.selectedCat;
-  const id = Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-
-  const txn = { id, amount, name: name || CATS.find(c=>c.id===cat)?.name, category: cat, date: new Date().toISOString() };
-  state.transactions.push(txn);
-  saveState();
-  closeModal();
-  renderMain();
-  showToast('Logged locally ✓', 'success');
-
-  // Push to Notion
-  await pushToNotion(txn);
+async function pushNotion(t){
+  if(!S.proxy){toast('No proxy URL — go to settings','err');return}
+  const cat=CATS.find(c=>c.id===t.category)||CATS[CATS.length-1];
+  const dbId=S.db.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
+  try{
+    const r=await fetch(S.proxy,{method:'POST',headers:{'Authorization':`Bearer ${S.key}`,'Content-Type':'application/json','Notion-Version':'2022-06-28'},body:JSON.stringify({parent:{database_id:dbId},properties:{Name:{title:[{text:{content:t.name||cat.name}}]},Amount:{number:t.amount},Category:{select:{name:cat.name}},Date:{date:{start:t.date}}}})});
+    if(r.ok)toast('Synced to Notion ✓','ok');
+    else{const e=await r.json();console.error(e);toast('Sync failed — check config','err')}
+  }catch(e){toast('Saved locally (offline)','err')}
 }
 
-// ---- NOTION ----
-async function pushToNotion(txn) {
-  const cat = CATS.find(c => c.id === txn.category);
-  const dbId = state.notionDb.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+let tt;
+function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2800)}
 
-  const body = {
-    parent: { database_id: dbId },
-    properties: {
-      "Name": { title: [{ text: { content: txn.name || cat.name } }] },
-      "Amount": { number: txn.amount },
-      "Category": { select: { name: cat.name } },
-      "Date": { date: { start: txn.date } },
-    }
-  };
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal()});
 
-  try {
-    const res = await fetch('https://api.notion.com/v1/pages', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${state.notionKey}`,
-        'Content-Type': 'application/json',
-        'Notion-Version': '2022-06-28',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (res.ok) {
-      showToast('Synced to Notion ✓', 'success');
-    } else {
-      const err = await res.json();
-      console.error('Notion error:', err);
-      showToast('Saved locally (Notion sync failed)', 'error');
-    }
-  } catch (e) {
-    showToast('Saved locally (offline)', 'error');
-  }
-}
-
-// ---- TOAST ----
-let toastTimer;
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast show ${type}`;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
-}
-
-// Close modal on overlay click
-document.getElementById('add-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-init();
+load();
+if(S.key&&S.db){go('main');render()}else{go('setup')}
 </script>
 </body>
 </html>
