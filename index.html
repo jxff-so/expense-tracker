@@ -16,64 +16,74 @@
   --border:rgba(140,110,70,0.13);--text:#2a1f0f;--muted:#a8947a;
   --accent:#8b6340;--accent-bg:rgba(139,99,64,0.09);
   --accent-light:#d4a96a;--danger:#c0392b;
-  --c-food:#c0622a;--c-shopping:#7a5535;--c-travel:#3a7a6a;
-  --c-services:#4a6080;--c-entertainment:#7a4a80;--c-health:#3a7a3a;
-  --c-transport:#6a6a20;--c-misc:#7a6a50;
 }
 body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100dvh;overflow-x:hidden;padding-bottom:env(safe-area-inset-bottom,20px)}
 .screen{display:none;flex-direction:column;min-height:100dvh}
 .screen.active{display:flex}
 
-/* ── SETUP ── */
-#setup{padding:64px 28px 44px;gap:20px;justify-content:center;background:var(--bg)}
+/* SETUP */
+#setup{padding:64px 28px 44px;gap:20px;justify-content:center}
 .logo{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);font-weight:700}
-.big-title{font-size:36px;font-weight:800;line-height:1.08;color:var(--text)}
+.big-title{font-size:36px;font-weight:800;line-height:1.08}
 .big-title span{color:var(--accent)}
 .sub{font-size:13px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
 .field-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
 input{width:100%;background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 input:focus{border-color:var(--accent-light)}
 input::placeholder{color:var(--muted)}
-.btn{background:var(--accent);color:#faf7f2;border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:transform .15s,opacity .15s;letter-spacing:.01em}
+.btn{background:var(--accent);color:#faf7f2;border:none;border-radius:14px;padding:16px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;cursor:pointer;width:100%;transition:transform .15s,opacity .15s}
 .btn:active{transform:scale(.97);opacity:.9}
 .help-link{font-size:12px;color:var(--muted);text-align:center;text-decoration:underline;cursor:pointer;font-family:'DM Mono',monospace}
 
-/* ── HEADER ── */
+/* HEADER */
 .header{padding:52px 22px 14px;display:flex;justify-content:space-between;align-items:flex-start;flex-shrink:0}
 .greeting{font-size:12px;color:var(--muted);letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:2px;font-weight:300}
-.wordmark{font-size:28px;font-weight:800;color:var(--text);line-height:1}.wordmark span{color:var(--accent)}
-.icon-btn{width:40px;height:40px;background:#fff;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.icon-btn:active{background:var(--surface)}
+.wordmark{font-size:28px;font-weight:800;line-height:1}.wordmark span{color:var(--accent)}
+.header-btns{display:flex;gap:8px;align-items:center}
+.icon-btn{width:40px;height:40px;background:#fff;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:background .12s,transform .12s;flex-shrink:0}
+.icon-btn:active{background:var(--surface);transform:scale(.93)}
+.icon-btn.spinning{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── MONTH CARD ── */
-.month-card{margin:0 18px 16px;background:var(--accent);border-radius:22px;padding:22px 24px;position:relative;overflow:hidden;flex-shrink:0}
+/* SYNC STATUS */
+.sync-bar{margin:0 18px 10px;display:flex;align-items:center;gap:6px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted)}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+.sync-dot.ok{background:#3a7a3a}
+.sync-dot.err{background:var(--danger)}
+.sync-dot.syncing{background:var(--accent-light);animation:pulse .8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* MONTH CARD */
+.month-card{margin:0 18px 14px;background:var(--accent);border-radius:22px;padding:22px 24px;position:relative;overflow:hidden;flex-shrink:0}
 .month-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
 .month-lbl{font-size:10px;color:rgba(250,247,242,.6);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
 .month-total{font-size:46px;font-weight:800;color:#faf7f2;letter-spacing:-2px;line-height:1}
 .month-cur{font-size:22px;vertical-align:super;letter-spacing:0}
 .month-count{font-size:11px;color:rgba(250,247,242,.6);font-family:'DM Mono',monospace;margin-top:6px}
 
-/* ── PIE CHART CARD ── */
-.chart-card{margin:0 18px 16px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:20px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+/* PIE CHART */
+.chart-card{margin:0 18px 14px;background:#fff;border:1px solid var(--border);border-radius:22px;padding:20px;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
 .chart-inner{display:flex;align-items:center;gap:18px}
 #pie-canvas{flex-shrink:0}
 .legend{flex:1;display:flex;flex-direction:column;gap:7px;min-width:0}
-.legend-row{display:flex;align-items:center;gap:7px;cursor:pointer}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-row{display:flex;align-items:center;gap:7px;cursor:pointer;border-radius:8px;padding:2px 4px;transition:background .12s}
+.legend-row:active{background:var(--surface)}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .legend-name{font-size:11px;font-weight:700;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.04em}
-.legend-pct{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);flex-shrink:0}
-.chart-empty{text-align:center;padding:24px 0;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px}
+.legend-amt{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);flex-shrink:0;margin-right:4px}
+.legend-pct{font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);flex-shrink:0;min-width:28px;text-align:right}
+.chart-empty{text-align:center;padding:20px 0;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px}
 
-/* ── SECTION ── */
+/* SECTION */
 .section-hdr{padding:0 20px;margin-bottom:10px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;flex-shrink:0}
 
-/* ── FILTERS ── */
+/* FILTERS */
 .filter-row{display:flex;gap:7px;padding:0 18px;margin-bottom:12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .filter-row::-webkit-scrollbar{display:none}
 .fpill{flex-shrink:0;background:#fff;border:1px solid var(--border);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .12s}
 .fpill.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-/* ── TXN LIST ── */
+/* TXN LIST */
 .txn-list{flex:1;padding:0 18px;display:flex;flex-direction:column;gap:8px;overflow-y:auto}
 .txn{background:#fff;border:1px solid var(--border);border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .txn-ico{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -86,28 +96,28 @@ input::placeholder{color:var(--muted)}
 .empty{text-align:center;padding:48px 20px;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;line-height:1.9}
 .empty .ico{font-size:36px;display:block;margin-bottom:10px}
 
-/* ── FAB ── */
+/* FAB */
 .fab{position:fixed;bottom:calc(24px + env(safe-area-inset-bottom,0px));right:20px;width:58px;height:58px;background:var(--accent);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;color:#faf7f2;cursor:pointer;box-shadow:0 4px 20px rgba(139,99,64,.3);border:none;font-weight:700;line-height:1}
 .fab:active{transform:scale(.93)}
 
-/* ── MODAL ── */
+/* MODAL */
 .overlay{display:none;position:fixed;inset:0;background:rgba(42,31,15,.4);backdrop-filter:blur(6px);z-index:100;align-items:flex-end}
 .overlay.open{display:flex}
 .modal{background:var(--bg);border-radius:28px 28px 0 0;border:1px solid var(--border);border-bottom:none;padding:12px 22px calc(28px + env(safe-area-inset-bottom,0px));width:100%}
 .handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px}
-.modal-title{font-size:20px;font-weight:800;margin-bottom:16px;color:var(--text)}
+.modal-title{font-size:20px;font-weight:800;margin-bottom:16px}
 .modal-lbl{font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:6px;display:block}
 .amt-wrap{position:relative;margin-bottom:14px}
 .amt-prefix{position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:800;color:var(--accent-light);font-family:'DM Mono',monospace;pointer-events:none}
-#amt-input{width:100%;background:#fff;border:2px solid var(--accent-light);border-radius:16px;padding:16px 16px 16px 44px;font-family:'DM Mono',monospace;font-size:32px;font-weight:800;color:var(--accent);outline:none;-webkit-appearance:none;letter-spacing:-1px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+#amt-input{width:100%;background:#fff;border:2px solid var(--accent-light);border-radius:16px;padding:16px 16px 16px 44px;font-family:'DM Mono',monospace;font-size:32px;font-weight:800;color:var(--accent);outline:none;-webkit-appearance:none;letter-spacing:-1px}
 #amt-input:focus{border-color:var(--accent)}
 .cat-grid-modal{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:16px}
 .cbtn{background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 4px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .12s;text-transform:uppercase;letter-spacing:.03em;line-height:1.2;text-align:center}
 .cbtn .cico{font-size:18px}
 .cbtn.on{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light)}
 
-/* ── GUIDE ── */
-#guide{padding:56px 22px 40px;gap:16px;overflow-y:auto;background:var(--bg)}
+/* GUIDE */
+#guide{padding:56px 22px 40px;gap:16px;overflow-y:auto}
 .gback{font-size:13px;color:var(--accent);cursor:pointer;font-weight:700;margin-bottom:4px}
 .gtitle{font-size:28px;font-weight:800;line-height:1.15;margin-bottom:4px}
 .gstep{background:#fff;border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -116,7 +126,7 @@ input::placeholder{color:var(--muted)}
 .sdesc{font-size:12px;color:var(--muted);line-height:1.65;font-family:'DM Mono',monospace;font-weight:300}
 .code-box{background:var(--surface);border-radius:10px;padding:10px 13px;margin-top:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--accent);line-height:1.8;word-break:break-all}
 
-/* ── TOAST ── */
+/* TOAST */
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-16px);color:#faf7f2;border-radius:12px;padding:9px 18px;font-size:12px;font-family:'DM Mono',monospace;white-space:nowrap;opacity:0;transition:all .3s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{background:var(--accent)}
@@ -130,7 +140,7 @@ input::placeholder{color:var(--muted)}
   <div class="logo">⚡ Spendly</div>
   <div>
     <div class="big-title">Track every<br><span>dollar.</span></div>
-    <p class="sub" style="margin-top:10px">Connect Notion once. Log transactions in seconds after every Apple Pay tap.</p>
+    <p class="sub" style="margin-top:10px">Connect Notion once. Syncs both ways — changes in Notion reflect here too.</p>
   </div>
   <div>
     <div class="field-label">Your Name</div>
@@ -165,7 +175,15 @@ input::placeholder{color:var(--muted)}
       <div class="greeting" id="greeting">Good morning, Jef</div>
       <div class="wordmark">spend<span>ly</span></div>
     </div>
-    <div class="icon-btn" onclick="openSettings()">⚙️</div>
+    <div class="header-btns">
+      <div class="icon-btn" id="refresh-btn" onclick="syncFromNotion(true)" title="Sync from Notion">↻</div>
+      <div class="icon-btn" onclick="openSettings()">⚙️</div>
+    </div>
+  </div>
+
+  <div class="sync-bar">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Not synced yet</span>
   </div>
 
   <div class="month-card">
@@ -174,8 +192,7 @@ input::placeholder{color:var(--muted)}
     <div class="month-count" id="txn-count">0 transactions</div>
   </div>
 
-  <!-- PIE CHART -->
-  <div class="chart-card" id="chart-card">
+  <div class="chart-card">
     <div class="chart-empty" id="chart-empty">Log your first transaction to see the breakdown</div>
     <div class="chart-inner" id="chart-inner" style="display:none">
       <canvas id="pie-canvas" width="120" height="120"></canvas>
@@ -193,6 +210,9 @@ input::placeholder{color:var(--muted)}
     <div class="fpill" onclick="filt('entertainment',this)">🎬 Entmt</div>
     <div class="fpill" onclick="filt('health',this)">💊 Health</div>
     <div class="fpill" onclick="filt('transport',this)">🚌 Transport</div>
+    <div class="fpill" onclick="filt('subscription',this)">🔁 Subs</div>
+    <div class="fpill" onclick="filt('investments',this)">📈 Invest</div>
+    <div class="fpill" onclick="filt('family',this)">🏠 Family</div>
     <div class="fpill" onclick="filt('misc',this)">📦 Misc</div>
   </div>
   <div class="txn-list" id="txn-list"></div>
@@ -212,7 +232,7 @@ input::placeholder{color:var(--muted)}
   <div class="gstep">
     <div class="snum">Step 02 — Notion</div>
     <div class="stitle">Create the expenses database</div>
-    <div class="sdesc">New Notion page → /database → Table – Full page → name it "Expenses". Add these columns:</div>
+    <div class="sdesc">New Notion page → /database → Table – Full page → name it "Expenses". Add these exact columns:</div>
     <div class="code-box">Name → Title (default)<br>Amount → Number<br>Category → Select<br>Date → Date<br>Notes → Text</div>
   </div>
   <div class="gstep">
@@ -228,13 +248,13 @@ input::placeholder{color:var(--muted)}
   </div>
   <div class="gstep">
     <div class="snum">Step 05 — Cloudflare</div>
-    <div class="stitle">Create a proxy Worker</div>
-    <div class="sdesc">cloudflare.com → Workers & Pages → Create → Create Worker → name it "notion-proxy" → Deploy → Edit Code → delete default code → paste the Worker code → Deploy. Copy the Worker URL.</div>
+    <div class="stitle">Update your Worker code</div>
+    <div class="sdesc">Replace your existing Worker code with the new version (notion-proxy-worker.js). It now handles GET, POST and DELETE so Spendly can read from and write to Notion.</div>
   </div>
   <div class="gstep">
     <div class="snum">Step 06 — iPhone</div>
     <div class="stitle">Add to Home Screen</div>
-    <div class="sdesc">Safari → Share → "Add to Home Screen". Opens full-screen like a native app.</div>
+    <div class="sdesc">Safari → Share → "Add to Home Screen".</div>
   </div>
   <div class="gstep">
     <div class="snum">Step 07 — Automation</div>
@@ -275,22 +295,30 @@ const CATS=[
   {id:'entertainment',name:'Entertainment',   icon:'🎬', hex:'#7a4a80'},
   {id:'health',       name:'Health',          icon:'💊', hex:'#3a7a3a'},
   {id:'transport',    name:'Transport',       icon:'🚌', hex:'#6a6a20'},
+  {id:'subscription', name:'Subscriptions',   icon:'🔁', hex:'#7a3a5a'},
+  {id:'investments',  name:'Investments',     icon:'📈', hex:'#2a6a4a'},
+  {id:'family',       name:'Family',          icon:'🏠', hex:'#8a5a2a'},
   {id:'misc',         name:'Miscellaneous',   icon:'📦', hex:'#7a6a50'},
 ];
+const SHORT={'Food & Drinks':'Food','Miscellaneous':'Misc','Entertainment':'Entmt','Subscriptions':'Subs','Investments':'Invest'};
+function short(n){return SHORT[n]||n.split(' ')[0]}
 
-const SHORT={
-  'Food & Drinks':'Food','Miscellaneous':'Misc','Entertainment':'Entmt'
-};
-function short(name){return SHORT[name]||name.split(' ')[0]}
+// Match Notion category name → CATS id (case-insensitive, partial)
+function catFromNotion(notionName){
+  if(!notionName)return'misc';
+  const n=notionName.toLowerCase();
+  const match=CATS.find(c=>c.name.toLowerCase()===n||c.id===n||n.includes(c.id));
+  return match?match.id:'misc';
+}
 
-let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all'};
+let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null};
 function load(){try{const d=localStorage.getItem('spendly');if(d)S={...S,...JSON.parse(d)}}catch(e){}}
 function save(){localStorage.setItem('spendly',JSON.stringify(S))}
 
 function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
 function goGuide(){go('guide')}
-function openSettings(){if(confirm('Disconnect Notion and reset?')){S.key='';S.db='';S.proxy='';S.name='';save();go('setup')}}
-function greeting(){const h=new Date().getHours();const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';return S.name?`${g}, ${S.name}`:`${g}`}
+function openSettings(){if(confirm('Disconnect Notion and reset all data?')){localStorage.removeItem('spendly');S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null};go('setup')}}
+function greetingText(){const h=new Date().getHours();const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';return S.name?`${g}, ${S.name}`:g}
 
 function saveSetup(){
   const k=document.getElementById('nkey').value.trim();
@@ -302,11 +330,73 @@ function saveSetup(){
   if(d.length<32){toast('Database ID must be 32 characters','err');return}
   if(!p.startsWith('https://')){toast('Proxy URL must start with https://','err');return}
   S.key=k;S.db=d;S.proxy=p;S.cur=c;S.name=n||'Jef';save();
-  go('main');render();toast('Connected to Notion ✓','ok');
+  go('main');render();
+  syncFromNotion(false);
 }
 
+// ── SYNC STATUS UI ──
+function setSyncStatus(state, label){
+  const dot=document.getElementById('sync-dot');
+  const lbl=document.getElementById('sync-label');
+  const btn=document.getElementById('refresh-btn');
+  dot.className='sync-dot'+(state?' '+state:'');
+  lbl.textContent=label;
+  btn.classList.toggle('spinning', state==='syncing');
+}
+
+// ── PULL FROM NOTION ──
+async function syncFromNotion(manual){
+  if(!S.proxy||!S.key||!S.db){return}
+  setSyncStatus('syncing','Syncing…');
+  const dbId=S.db.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
+  try{
+    const r=await fetch(S.proxy,{
+      method:'GET',
+      headers:{
+        'Authorization':`Bearer ${S.key}`,
+        'Notion-Version':'2022-06-28',
+        'X-Database-Id':dbId,
+      }
+    });
+    if(!r.ok){const e=await r.json();throw new Error(e.message||'Query failed')}
+    const data=await r.json();
+    // Map Notion pages → our transaction format
+    S.txns=data.results
+      .filter(p=>!p.archived)
+      .map(p=>{
+        const props=p.properties;
+        const nameArr=props.Name?.title;
+        const name=nameArr&&nameArr.length?nameArr[0].plain_text:'';
+        const amount=props.Amount?.number||0;
+        const catName=props.Category?.select?.name||'';
+        const dateStr=props.Date?.date?.start||p.created_time;
+        return{
+          id:p.id,          // use Notion page ID as our ID
+          notionId:p.id,
+          name,
+          amount,
+          category:catFromNotion(catName),
+          date:dateStr,
+        };
+      })
+      .filter(t=>t.amount>0);
+
+    S.lastSync=new Date().toISOString();
+    save();
+    render();
+    const timeStr=new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
+    setSyncStatus('ok',`Synced at ${timeStr}`);
+    if(manual)toast('Synced from Notion ✓','ok');
+  }catch(e){
+    console.error('Sync error:',e);
+    setSyncStatus('err','Sync failed');
+    if(manual)toast('Sync failed — check connection','err');
+  }
+}
+
+// ── RENDER ──
 function render(){
-  document.getElementById('greeting').textContent=greeting();
+  document.getElementById('greeting').textContent=greetingText();
   document.getElementById('cur-disp').textContent=S.cur;
   document.getElementById('mcur').textContent=S.cur;
   const now=new Date();
@@ -318,23 +408,20 @@ function render(){
   document.getElementById('txn-count').textContent=`${mTxns.length} transaction${mTxns.length!==1?'s':''}`;
   renderChart(mTxns);
   renderList();
+  if(S.lastSync){
+    const timeStr=new Date(S.lastSync).toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
+    setSyncStatus('ok',`Synced at ${timeStr}`);
+  }
 }
 
 // ── PIE CHART ──
 function renderChart(mTxns){
   const total=mTxns.reduce((a,t)=>a+t.amount,0);
-  const chartInner=document.getElementById('chart-inner');
-  const chartEmpty=document.getElementById('chart-empty');
-  if(!total){chartInner.style.display='none';chartEmpty.style.display='block';return}
-  chartInner.style.display='flex';chartEmpty.style.display='none';
-
-  // Build data
-  const data=CATS.map(c=>({
-    cat:c,
-    amt:mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0)
-  })).filter(d=>d.amt>0).sort((a,b)=>b.amt-a.amt);
-
-  // Draw pie
+  const ci=document.getElementById('chart-inner'),ce=document.getElementById('chart-empty');
+  if(!total){ci.style.display='none';ce.style.display='block';return}
+  ci.style.display='flex';ce.style.display='none';
+  const data=CATS.map(c=>({cat:c,amt:mTxns.filter(t=>t.category===c.id).reduce((a,t)=>a+t.amount,0)}))
+    .filter(d=>d.amt>0).sort((a,b)=>b.amt-a.amt);
   const canvas=document.getElementById('pie-canvas');
   const ctx=canvas.getContext('2d');
   const cx=60,cy=60,r=52,gap=0.03;
@@ -342,32 +429,20 @@ function renderChart(mTxns){
   let angle=-Math.PI/2;
   data.forEach(d=>{
     const slice=(d.amt/total)*Math.PI*2;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
+    ctx.beginPath();ctx.moveTo(cx,cy);
     ctx.arc(cx,cy,r,angle+gap/2,angle+slice-gap/2);
-    ctx.closePath();
-    ctx.fillStyle=d.cat.hex;
-    ctx.fill();
+    ctx.closePath();ctx.fillStyle=d.cat.hex;ctx.fill();
     angle+=slice;
   });
-  // Centre hole (donut)
-  ctx.beginPath();
-  ctx.arc(cx,cy,32,0,Math.PI*2);
-  ctx.fillStyle='#fff';
-  ctx.fill();
-  // Centre label
-  ctx.fillStyle='#2a1f0f';
-  ctx.font='700 11px Syne,sans-serif';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
+  ctx.beginPath();ctx.arc(cx,cy,32,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  ctx.fillStyle='#2a1f0f';ctx.font='700 11px Syne,sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.fillText(data.length+' cats',cx,cy);
-
-  // Legend
   const legend=document.getElementById('legend');legend.innerHTML='';
   data.forEach(d=>{
     const pct=Math.round((d.amt/total)*100);
     const row=document.createElement('div');row.className='legend-row';
-    row.innerHTML=`<div class="legend-dot" style="background:${d.cat.hex}"></div><div class="legend-name" style="color:${d.cat.hex}">${short(d.cat.name)}</div><div class="legend-pct">${pct}%</div>`;
+    row.innerHTML=`<div class="legend-dot" style="background:${d.cat.hex}"></div><div class="legend-name" style="color:${d.cat.hex}">${short(d.cat.name)}</div><div class="legend-amt">${S.cur}${d.amt.toFixed(0)}</div><div class="legend-pct">${pct}%</div>`;
     row.onclick=()=>{S.filter=d.cat.id;document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));renderList()};
     legend.appendChild(row);
   });
@@ -376,13 +451,12 @@ function renderChart(mTxns){
 function filt(id,el){
   S.filter=id;
   document.querySelectorAll('.fpill').forEach(p=>p.classList.remove('on'));
-  el.classList.add('on');
-  renderList();
+  el.classList.add('on');renderList();
 }
 
 function renderList(){
   const l=document.getElementById('txn-list');
-  let txns=[...S.txns].reverse();
+  let txns=[...S.txns].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(S.filter!=='all')txns=txns.filter(t=>t.category===S.filter);
   if(!txns.length){l.innerHTML=`<div class="empty"><span class="ico">💸</span>No transactions yet.<br>Tap + to log your first one.</div>`;return}
   l.innerHTML='';
@@ -390,13 +464,28 @@ function renderList(){
     const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
     const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     const el=document.createElement('div');el.className='txn';
-    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}15">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}')">✕</button>`;
+    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}15">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
     l.appendChild(el);
   });
 }
 
-function delTxn(id){if(!confirm('Delete this transaction?'))return;S.txns=S.txns.filter(t=>t.id!==id);save();render()}
+// ── DELETE — archives in Notion + removes locally ──
+async function delTxn(localId, notionId){
+  if(!confirm('Delete this transaction?'))return;
+  S.txns=S.txns.filter(t=>t.id!==localId);
+  save();render();
+  if(notionId&&S.proxy){
+    const fmtId=notionId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
+    try{
+      await fetch(S.proxy,{
+        method:'DELETE',
+        headers:{'Authorization':`Bearer ${S.key}`,'Notion-Version':'2022-06-28','X-Page-Id':fmtId}
+      });
+    }catch(e){console.error('Delete sync failed:',e)}
+  }
+}
 
+// ── ADD MODAL ──
 function buildCatRow(){
   const r=document.getElementById('cat-row');r.innerHTML='';
   CATS.forEach(c=>{
@@ -407,7 +496,6 @@ function buildCatRow(){
     r.appendChild(b);
   });
 }
-
 function openModal(){
   document.getElementById('amt-input').value='';
   document.getElementById('txn-name').value='';
@@ -421,8 +509,8 @@ async function addTxn(){
   const amount=parseFloat(document.getElementById('amt-input').value);
   if(!amount||amount<=0){toast('Enter an amount','err');return}
   const name=document.getElementById('txn-name').value.trim();
-  const id=Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-  const txn={id,amount,name:name||(CATS.find(c=>c.id===S.selCat)?.name||''),category:S.selCat,date:new Date().toISOString()};
+  const tempId='local_'+Date.now().toString(36);
+  const txn={id:tempId,notionId:null,amount,name:name||(CATS.find(c=>c.id===S.selCat)?.name||''),category:S.selCat,date:new Date().toISOString()};
   S.txns.push(txn);save();closeModal();render();toast('Saved locally ✓','ok');
   await pushNotion(txn);
 }
@@ -432,9 +520,29 @@ async function pushNotion(t){
   const cat=CATS.find(c=>c.id===t.category)||CATS[CATS.length-1];
   const dbId=S.db.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
   try{
-    const r=await fetch(S.proxy,{method:'POST',headers:{'Authorization':`Bearer ${S.key}`,'Content-Type':'application/json','Notion-Version':'2022-06-28'},body:JSON.stringify({parent:{database_id:dbId},properties:{Name:{title:[{text:{content:t.name||cat.name}}]},Amount:{number:t.amount},Category:{select:{name:cat.name}},Date:{date:{start:t.date}}}})});
-    if(r.ok)toast('Synced to Notion ✓','ok');
-    else{const e=await r.json();console.error(e);toast('Sync failed — check config','err')}
+    const r=await fetch(S.proxy,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${S.key}`,'Content-Type':'application/json','Notion-Version':'2022-06-28'},
+      body:JSON.stringify({
+        parent:{database_id:dbId},
+        properties:{
+          Name:{title:[{text:{content:t.name||cat.name}}]},
+          Amount:{number:t.amount},
+          Category:{select:{name:cat.name}},
+          Date:{date:{start:t.date}},
+        }
+      })
+    });
+    if(r.ok){
+      const page=await r.json();
+      // Replace temp local ID with real Notion page ID
+      const idx=S.txns.findIndex(x=>x.id===t.id);
+      if(idx>=0){S.txns[idx].notionId=page.id;S.txns[idx].id=page.id;}
+      save();
+      toast('Synced to Notion ✓','ok');
+    } else {
+      const e=await r.json();console.error(e);toast('Saved locally (Notion sync failed)','err');
+    }
   }catch(e){toast('Saved locally (offline)','err')}
 }
 
@@ -444,7 +552,7 @@ function toast(msg,type){const el=document.getElementById('toast');el.textConten
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal()});
 
 load();
-if(S.key&&S.db){go('main');render()}else{go('setup')}
+if(S.key&&S.db){go('main');render();syncFromNotion(false);}else{go('setup')}
 </script>
 </body>
 </html>
