@@ -473,7 +473,11 @@ function filt(id,el){
 
 function renderList(){
   const l=document.getElementById('txn-list');
-  let txns=[...S.txns].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const now=new Date();
+  const mo=now.getMonth(),yr=now.getFullYear();
+  let txns=[...S.txns]
+    .filter(t=>{const d=new Date(t.date);return d.getMonth()===mo&&d.getFullYear()===yr})
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
   if(S.filter!=='all')txns=txns.filter(t=>t.category===S.filter);
   if(!txns.length){l.innerHTML=`<div class="empty"><span class="ico">💸</span>No transactions yet.<br>Tap + to log your first one.</div>`;return}
   l.innerHTML='';
