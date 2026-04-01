@@ -57,7 +57,17 @@ input::placeholder{color:var(--muted)}
 /* MONTH CARD */
 .month-card{margin:0 18px 14px;background:var(--accent);border-radius:22px;padding:22px 24px;position:relative;overflow:hidden;flex-shrink:0}
 .month-card::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none}
-.month-lbl{font-size:10px;color:rgba(250,247,242,.6);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-bottom:6px}
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.month-lbl{font-size:10px;color:rgba(250,247,242,.6);letter-spacing:.15em;text-transform:uppercase;font-family:'DM Mono',monospace}
+.mnav-btn{background:rgba(255,255,255,.15);border:none;color:#faf7f2;font-size:20px;width:28px;height:28px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .12s;padding:0}
+.mnav-btn:active{background:rgba(255,255,255,.28)}
+.mnav-btn:disabled{opacity:.25;cursor:default}
+.month-row{background:#fff;border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:background .12s}
+.month-row:active{background:var(--surface)}
+.month-row.current{border-color:var(--accent-light);background:var(--accent-bg)}
+.month-row-label{font-size:14px;font-weight:700}
+.month-row-meta{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted)}
+.month-row-amt{font-size:14px;font-family:'DM Mono',monospace;color:var(--accent);font-weight:700}
 .month-total{font-size:46px;font-weight:800;color:#faf7f2;letter-spacing:-2px;line-height:1}
 .month-cur{font-size:22px;vertical-align:super;letter-spacing:0}
 .month-count{font-size:11px;color:rgba(250,247,242,.6);font-family:'DM Mono',monospace;margin-top:6px}
@@ -186,8 +196,11 @@ input::placeholder{color:var(--muted)}
     <span id="sync-label">Not synced yet</span>
   </div>
 
-  <div class="month-card">
-    <div class="month-lbl" id="mlbl">This month</div>
+  <div class="month-card" onclick="openMonthPicker()" style="cursor:pointer">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div class="month-lbl" id="mlbl">This month</div>
+      <div style="font-size:11px;color:rgba(250,247,242,.5);font-family:'DM Mono',monospace;letter-spacing:.05em">tap to browse ›</div>
+    </div>
     <div class="month-total"><span class="month-cur" id="cur-disp">$</span><span id="total">0.00</span></div>
     <div class="month-count" id="txn-count">0 transactions</div>
   </div>
@@ -284,6 +297,17 @@ input::placeholder{color:var(--muted)}
   </div>
 </div>
 
+<!-- MONTH PICKER MODAL -->
+<div class="overlay" id="month-overlay">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="modal-title">Select Month</div>
+    <div id="month-picker-list" style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto;padding-bottom:8px"></div>
+    <div style="height:4px"></div>
+    <div class="help-link" onclick="closeMonthPicker()">Cancel</div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -311,7 +335,7 @@ function catFromNotion(notionName){
   return match?match.id:'misc';
 }
 
-let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null};
+let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null,viewOffset:0};
 function load(){try{const d=localStorage.getItem('spendly');if(d)S={...S,...JSON.parse(d)}}catch(e){}}
 function save(){localStorage.setItem('spendly',JSON.stringify(S))}
 
@@ -395,17 +419,28 @@ async function syncFromNotion(manual){
 }
 
 // ── RENDER ──
+function viewDate(){
+  const now=new Date();
+  const d=new Date(now.getFullYear(),now.getMonth()+S.viewOffset,1);
+  return{mo:d.getMonth(),yr:d.getFullYear()};
+}
+function isCurrentMonth(){
+  return S.viewOffset===0;
+}
 function render(){
   document.getElementById('greeting').textContent=greetingText();
   document.getElementById('cur-disp').textContent=S.cur;
   document.getElementById('mcur').textContent=S.cur;
-  const now=new Date();
-  const mo=now.getMonth(),yr=now.getFullYear();
-  document.getElementById('mlbl').textContent=now.toLocaleString('default',{month:'long',year:'numeric'});
+  const{mo,yr}=viewDate();
+  const vDate=new Date(yr,mo,1);
+  const label=isCurrentMonth()?'This month — '+vDate.toLocaleString('default',{month:'long',year:'numeric'}):vDate.toLocaleString('default',{month:'long',year:'numeric'});
+  document.getElementById('mlbl').textContent=label;
   const mTxns=S.txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===mo&&d.getFullYear()===yr});
   const tot=mTxns.reduce((a,t)=>a+t.amount,0);
   document.getElementById('total').textContent=tot.toFixed(2);
   document.getElementById('txn-count').textContent=`${mTxns.length} transaction${mTxns.length!==1?'s':''}`;
+  // Hide FAB when viewing past months
+  document.querySelector('.fab').style.display=isCurrentMonth()?'flex':'none';
   renderChart(mTxns);
   renderList();
   if(S.lastSync){
@@ -473,8 +508,7 @@ function filt(id,el){
 
 function renderList(){
   const l=document.getElementById('txn-list');
-  const now=new Date();
-  const mo=now.getMonth(),yr=now.getFullYear();
+  const{mo,yr}=viewDate();
   let txns=[...S.txns]
     .filter(t=>{const d=new Date(t.date);return d.getMonth()===mo&&d.getFullYear()===yr})
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
@@ -567,12 +601,55 @@ async function pushNotion(t){
   }catch(e){toast('Saved locally (offline)','err')}
 }
 
+// ── MONTH PICKER ──
+function openMonthPicker(){
+  // Build list of months that have transactions, plus current month
+  const now=new Date();
+  const monthsWithData=new Set();
+  S.txns.forEach(t=>{
+    const d=new Date(t.date);
+    monthsWithData.add(d.getFullYear()+'-'+d.getMonth());
+  });
+  // Always include current month and up to 12 months back
+  const rows=[];
+  for(let i=0;i<=24;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const key=d.getFullYear()+'-'+d.getMonth();
+    const hasTxns=monthsWithData.has(key);
+    if(i===0||hasTxns) rows.push({offset:-i,date:d,hasTxns});
+  }
+  const list=document.getElementById('month-picker-list');
+  list.innerHTML='';
+  rows.forEach(r=>{
+    const isCur=r.offset===S.viewOffset;
+    const mTxns=S.txns.filter(t=>{const d=new Date(t.date);return d.getMonth()===r.date.getMonth()&&d.getFullYear()===r.date.getFullYear()});
+    const tot=mTxns.reduce((a,t)=>a+t.amount,0);
+    const label=r.offset===0?'This month':r.date.toLocaleString('default',{month:'long',year:'numeric'});
+    const row=document.createElement('div');
+    row.className='month-row'+(isCur?' current':'');
+    row.innerHTML=`<div><div class="month-row-label">${label}</div><div class="month-row-meta">${mTxns.length} transaction${mTxns.length!==1?'s':''}</div></div><div class="month-row-amt">${tot>0?S.cur+tot.toFixed(2):'—'}</div>`;
+    row.onclick=()=>selectMonth(r.offset);
+    list.appendChild(row);
+  });
+  document.getElementById('month-overlay').classList.add('open');
+}
+function closeMonthPicker(){
+  document.getElementById('month-overlay').classList.remove('open');
+}
+function selectMonth(offset){
+  S.viewOffset=offset;
+  closeMonthPicker();
+  render();
+}
+
 let tt;
 function toast(msg,type){const el=document.getElementById('toast');el.textContent=msg;el.className=`toast show ${type}`;clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2800)}
 
 document.getElementById('overlay').addEventListener('click',e=>{if(e.target===document.getElementById('overlay'))closeModal()});
+document.getElementById('month-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('month-overlay'))closeMonthPicker()});
 
 load();
+S.viewOffset=0;
 if(S.key&&S.db){go('main');render();syncFromNotion(false);}else{go('setup')}
 </script>
 </body>
