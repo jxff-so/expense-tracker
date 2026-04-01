@@ -202,7 +202,8 @@ Given an email body like:
 
 ```
 Transaction Ref: IPS00000000XXXXXXX
-Date & Time:20 Mar 20:00 (SGT)Amount:SGD5.00
+Date & Time:20 Mar 20:00 (SGT)
+Amount:SGD5.00
 From:PayLah! Wallet (Mobile ending 9999)
 To:FOOD HOLDINGS PTE.LTD.
 ```
