@@ -281,7 +281,7 @@ input::placeholder{color:var(--muted)}
 <div class="overlay" id="overlay">
   <div class="modal">
     <div class="handle"></div>
-    <div class="modal-title">New transaction</div>
+    <div class="modal-title" id="modal-title">New transaction</div>
     <label class="modal-lbl">Amount</label>
     <div class="amt-wrap">
       <span class="amt-prefix" id="mcur">$</span>
@@ -291,7 +291,7 @@ input::placeholder{color:var(--muted)}
     <input id="txn-name" type="text" placeholder="e.g. Grab to Orchard" style="margin-bottom:14px" autocomplete="off">
     <label class="modal-lbl">Category</label>
     <div class="cat-grid-modal" id="cat-row"></div>
-    <button class="btn" onclick="addTxn()">Log transaction →</button>
+    <button class="btn" id="modal-btn" onclick="submitTxn()">Log transaction →</button>
     <div style="height:8px"></div>
     <div class="help-link" onclick="closeModal()">Cancel</div>
   </div>
@@ -335,7 +335,7 @@ function catFromNotion(notionName){
   return match?match.id:'misc';
 }
 
-let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null,viewOffset:0};
+let S={key:'',db:'',proxy:'',cur:'$',name:'Jef',txns:[],selCat:'food',filter:'all',lastSync:null,viewOffset:0,editId:null};
 function load(){try{const d=localStorage.getItem('spendly');if(d)S={...S,...JSON.parse(d)}}catch(e){}}
 function save(){localStorage.setItem('spendly',JSON.stringify(S))}
 
@@ -518,8 +518,9 @@ function renderList(){
   txns.forEach(t=>{
     const c=CATS.find(x=>x.id===t.category)||CATS[CATS.length-1];
     const ds=new Date(t.date).toLocaleString('en-SG',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    const el=document.createElement('div');el.className='txn';
-    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}18;font-size:20px">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
+    const el=document.createElement('div');el.className='txn';el.style.cursor='pointer';
+    el.onclick=()=>openEditModal(t.id);
+    el.innerHTML=`<div class="txn-ico" style="background:${c.hex}18;font-size:20px">${c.icon}</div><div class="txn-info"><div class="txn-name">${t.name||c.name}</div><div class="txn-sub">${c.name} · ${ds}</div></div><div class="txn-amt" style="color:${c.hex}">${S.cur}${t.amount.toFixed(2)}</div><button class="del-btn" onclick="event.stopPropagation();delTxn('${t.id}','${t.notionId||t.id}')">✕</button>`;
     l.appendChild(el);
   });
 }
@@ -530,7 +531,7 @@ async function delTxn(localId, notionId){
   S.txns=S.txns.filter(t=>t.id!==localId);
   save();render();
   if(notionId&&S.proxy){
-    const fmtId=notionId.replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
+    const fmtId=notionId.replace(/-/g,'').replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
     try{
       await fetch(S.proxy,{
         method:'DELETE',
@@ -552,13 +553,29 @@ function buildCatRow(){
   });
 }
 function openModal(){
+  S.editId=null;
+  document.getElementById('modal-title').textContent='New transaction';
+  document.getElementById('modal-btn').textContent='Log transaction →';
   document.getElementById('amt-input').value='';
   document.getElementById('txn-name').value='';
   buildCatRow();
   document.getElementById('overlay').classList.add('open');
   setTimeout(()=>document.getElementById('amt-input').focus(),300);
 }
+function openEditModal(id){
+  const t=S.txns.find(x=>x.id===id);
+  if(!t)return;
+  S.editId=id;S.selCat=t.category;
+  document.getElementById('modal-title').textContent='Edit transaction';
+  document.getElementById('modal-btn').textContent='Save changes →';
+  document.getElementById('amt-input').value=t.amount;
+  document.getElementById('txn-name').value=t.name;
+  buildCatRow();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('amt-input').focus(),300);
+}
 function closeModal(){document.getElementById('overlay').classList.remove('open')}
+function submitTxn(){S.editId?updateTxn():addTxn()}
 
 async function addTxn(){
   const amount=parseFloat(document.getElementById('amt-input').value);
@@ -570,6 +587,33 @@ async function addTxn(){
   await pushNotion(txn);
 }
 
+async function updateTxn(){
+  const amount=parseFloat(document.getElementById('amt-input').value);
+  if(!amount||amount<=0){toast('Enter an amount','err');return}
+  const name=document.getElementById('txn-name').value.trim();
+  const idx=S.txns.findIndex(x=>x.id===S.editId);
+  if(idx<0)return;
+  const t=S.txns[idx];
+  t.amount=amount;t.name=name||(CATS.find(c=>c.id===S.selCat)?.name||'');t.category=S.selCat;
+  save();closeModal();render();toast('Updated ✓','ok');
+  await patchNotion(t);
+}
+async function patchNotion(t){
+  if(!S.proxy||!t.notionId)return;
+  const cat=CATS.find(c=>c.id===t.category)||CATS[CATS.length-1];
+  const fmtId=t.notionId.replace(/-/g,'').replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/,'$1-$2-$3-$4-$5');
+  try{
+    await fetch(S.proxy,{
+      method:'PATCH',
+      headers:{'Authorization':`Bearer ${S.key}`,'Content-Type':'application/json','Notion-Version':'2022-06-28','X-Page-Id':fmtId},
+      body:JSON.stringify({properties:{
+        Name:{title:[{text:{content:t.name||cat.name}}]},
+        Amount:{number:t.amount},
+        Category:{select:{name:cat.name}},
+      }})
+    });
+  }catch(e){console.error('Patch failed:',e)}
+}
 async function pushNotion(t){
   if(!S.proxy){toast('No proxy URL — go to settings','err');return}
   const cat=CATS.find(c=>c.id===t.category)||CATS[CATS.length-1];
