@@ -1,4 +1,4 @@
-# expense-tracker
+# Expense Tracker
 
 A personal mobile expense tracker (Spendly) that syncs to a Notion database via a Cloudflare Worker proxy.
 
@@ -241,15 +241,3 @@ The script writes the full display name into the Notion `Category` select field.
 Run `removeTrigger()` in the Apps Script editor to stop the automatic sync.
 
 ---
-
-## Deploying with Wrangler (optional)
-
-If you want to host the front-end on Cloudflare Pages/Workers as well:
-
-```bash
-npm install -g wrangler
-wrangler login
-wrangler deploy
-```
-
-The `wrangler.jsonc` is already configured to serve the current directory as a static asset.
