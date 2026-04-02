@@ -82,10 +82,6 @@ function parsePayLahEmail(body, emailDate) {
   const rawMerchant = merchantMatch ? merchantMatch[1].trim() : 'PayLah! Payment';
   const merchant = cleanMerchantName(rawMerchant);
 
-  // Transaction ref — "Transaction Ref: IPS12345..."
-  const refMatch = body.match(/Transaction\s*Ref[:\s]+([A-Z0-9]+)/i);
-  const ref = refMatch ? refMatch[1] : '';
-
   // Date — "Date & Time:28 Mar 20:17 (SGT)"
   const dateMatch = body.match(/Date\s*&\s*Time:\s*(\d{1,2}\s+\w{3})\s+(\d{2}:\d{2})/i);
   let txnDate;
@@ -104,7 +100,7 @@ function parsePayLahEmail(body, emailDate) {
     merchant,
     category: guessCategory(rawMerchant),
     date: txnDate.toISOString(),
-    notes: ref ? `Ref: ${ref}` : '',
+    notes: '',
   };
 }
 
