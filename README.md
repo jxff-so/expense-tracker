@@ -60,105 +60,13 @@ Your worker URL will be: `https://notion-proxy.<yourname>.workers.dev`
 
 #### 4b — Worker Code
 
-```js
-const NOTION_API = "https://api.notion.com/v1";
-
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Authorization, Content-Type, Notion-Version, X-Database-Id, X-Page-Id",
-};
-
-export default {
-  async fetch(request) {
-    // Handle CORS preflight
-    if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS });
-    }
-
-    const auth = request.headers.get("Authorization");
-    const notionVersion = request.headers.get("Notion-Version") || "2022-06-28";
-
-    const notionHeaders = {
-      "Authorization": auth,
-      "Notion-Version": notionVersion,
-      "Content-Type": "application/json",
-    };
-
-    let notionRes;
-
-    if (request.method === "GET") {
-      // Query the database — Database ID passed via X-Database-Id header
-      const dbId = request.headers.get("X-Database-Id");
-      if (!dbId) {
-        return new Response(JSON.stringify({ message: "Missing X-Database-Id header" }), {
-          status: 400, headers: { ...CORS, "Content-Type": "application/json" },
-        });
-      }
-      notionRes = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
-        method: "POST",
-        headers: notionHeaders,
-        body: JSON.stringify({ page_size: 100 }),
-      });
-
-    } else if (request.method === "POST") {
-      // Create a new page (add transaction)
-      const body = await request.json();
-      notionRes = await fetch(`${NOTION_API}/pages`, {
-        method: "POST",
-        headers: notionHeaders,
-        body: JSON.stringify(body),
-      });
-
-    } else if (request.method === "PATCH") {
-      // Update page properties (edit transaction) — Page ID passed via X-Page-Id header
-      const pageId = request.headers.get("X-Page-Id");
-      if (!pageId) {
-        return new Response(JSON.stringify({ message: "Missing X-Page-Id header" }), {
-          status: 400, headers: { ...CORS, "Content-Type": "application/json" },
-        });
-      }
-      const body = await request.json();
-      notionRes = await fetch(`${NOTION_API}/pages/${pageId}`, {
-        method: "PATCH",
-        headers: notionHeaders,
-        body: JSON.stringify(body),
-      });
-
-    } else if (request.method === "DELETE") {
-      // Archive a page (delete transaction) — Page ID passed via X-Page-Id header
-      const pageId = request.headers.get("X-Page-Id");
-      if (!pageId) {
-        return new Response(JSON.stringify({ message: "Missing X-Page-Id header" }), {
-          status: 400, headers: { ...CORS, "Content-Type": "application/json" },
-        });
-      }
-      notionRes = await fetch(`${NOTION_API}/pages/${pageId}`, {
-        method: "PATCH",
-        headers: notionHeaders,
-        body: JSON.stringify({ archived: true }),
-      });
-
-    } else {
-      return new Response(JSON.stringify({ message: "Method not allowed" }), {
-        status: 405, headers: { ...CORS, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await notionRes.text();
-    return new Response(data, {
-      status: notionRes.status,
-      headers: { ...CORS, "Content-Type": "application/json" },
-    });
-  },
-};
-```
+The full worker code is in [`notion-proxy-worker.js`](notion-proxy-worker.js). Copy the entire contents of that file into the Cloudflare editor and deploy.
 
 ---
 
 ### Step 5 — Configure the App
 
-Open the app in your browser (or deploy it with `wrangler deploy`). On first launch you'll see a setup screen with these fields:
+Open the app in your browser. On first launch you'll see a setup screen with these fields:
 
 | Field               | Value                                              |
 |---------------------|----------------------------------------------------|
@@ -170,9 +78,9 @@ Open the app in your browser (or deploy it with `wrangler deploy`). On first lau
 
 ---
 
-## Gmail Auto-Sync (PayLah! Alerts)
+## Gmail Auto-Sync (Transaction Alerts)
 
-Transactions are logged automatically by a Google Apps Script that monitors your Gmail for PayLah! alert emails from `paylah.alert@dbs.com`. Every 12 hours it fetches any new alerts, parses the amount and merchant, and creates a Notion page directly — no manual input needed. The Spendly app picks them up on its next sync.
+Transactions are logged automatically by a Google Apps Script that monitors your Gmail bank alert emails. Every 12 hours it fetches any new alerts, parses the amount and merchant, and creates a Notion page directly — no manual input needed. The Spendly app picks them up on its next sync.
 
 The script calls the Notion API directly (server-side, no CORS proxy needed) and applies a `spendly-processed` Gmail label to every thread it handles so it never double-processes.
 
@@ -192,31 +100,17 @@ function setConfig() {
 }
 ```
 
-4. Run `createTrigger()` once. This registers a time-based trigger that runs `processPayLahEmails` every 12 hours in the background — even when your phone is off. It also saves today's date as the cutoff, so historical emails are permanently ignored.
+4. Run `createTrigger()` once. This registers a time-based trigger that runs `processEmailAlerts` every 12 hours in the background — even when your phone is off. It also saves today's date as the cutoff, so historical emails are permanently ignored.
 
-5. To test immediately, run `processPayLahEmails()` manually and check the **Execution log** (View → Executions).
+5. To test immediately, run `processEmailAlerts()` manually and check the **Execution log** (View → Executions).
 
-### How It Parses the Email
+### Supported Banks
 
-Given an email body like:
+| Bank | Sender | Subject filter |
+|------|--------|----------------|
+| DBS PayLah! | `paylah.alert@dbs.com` | *(any)* |
+| Citibank | `alerts@citibank.com.sg` | `Citi Alerts - Credit Card/Ready Credit Transaction` |
 
-```
-Transaction Ref: IPS00000000XXXXXXX
-Date & Time:20 Mar 20:00 (SGT)
-Amount:SGD5.00
-From:PayLah! Wallet (Mobile ending 9999)
-To:FOOD HOLDINGS PTE.LTD.
-```
-
-The script extracts:
-
-| Field    | Extracted value                           |
-|----------|-------------------------------------------|
-| Name     | `FOOD HOLDINGS` (legal suffix stripped)   |
-| Amount   | `5.00`                                    |
-| Category | `Food & Drinks` (auto-detected)           |
-| Date     | `2025-03-20T20:00:00+08:00`               |
-| Notes    | `Ref: IPS00000000XXXXXXX`                 |
 
 ### Category Auto-Detection
 
