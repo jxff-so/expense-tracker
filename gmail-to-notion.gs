@@ -1,10 +1,11 @@
 /**
  * Spendly — Gmail → Notion Auto-Sync
  *
- * Watches for PayLah! transaction alert emails and automatically
+ * Watches for PayLah! + Citibank transaction alert emails and automatically
  * logs them to your Notion Expenses database.
  *
  * SETUP:
+ *  0. Change the respective bank alerts threshold to receive email alerts
  *  1. Open script.google.com → New project → paste this file.
  *  2. Run setConfig() once to store your credentials.
  *  3. Run createTrigger() once to start the 12 hour auto-sync.
@@ -154,10 +155,59 @@ function createNotionPage(txn, config) {
 }
 
 // ─────────────────────────────────────────────
+// CITI PARSER
+// ─────────────────────────────────────────────
+
+/**
+ * Parses a Citibank credit card alert email body.
+ *
+ * Expected format (key parts):
+ *   Transaction date: 20/03/20
+ *   Transaction time: 12:00:00
+ *   Transaction amount: 500
+ *   Transaction details : SHOPEE SINGAPORE MP SINGAPORE SGP
+ */
+function parseCitiEmail(body, emailDate) {
+  // Amount — "Transaction amount: 500" or "Transaction amount: 12.50"
+  const amountMatch = body.match(/Transaction\s+amount\s*:\s*([\d,]+(?:\.\d{1,2})?)/i);
+  if (!amountMatch) return null;
+  const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
+  if (!amount || amount <= 0) return null;
+
+  // Merchant — "Transaction details : SHOPEE SINGAPORE MP SINGAPORE SGP"
+  const merchantMatch = body.match(/Transaction\s+details\s*:\s*(.+)/i);
+  const rawMerchant = merchantMatch ? merchantMatch[1].trim() : 'Citi Card Payment';
+  const merchant = cleanMerchantName(rawMerchant);
+
+  // Date — "Transaction date: 20/03/20" + "Transaction time: 12:00:00"
+  const dateMatch = body.match(/Transaction\s+date\s*:\s*(\d{2}\/\d{2}\/\d{2,4})/i);
+  const timeMatch = body.match(/Transaction\s+time\s*:\s*(\d{2}:\d{2}:\d{2})/i);
+  let txnDate;
+  if (dateMatch) {
+    const parts = dateMatch[1].split('/'); // DD/MM/YY or DD/MM/YYYY
+    const day   = parts[0];
+    const month = parts[1];
+    const year  = parts[2].length === 2 ? '20' + parts[2] : parts[2];
+    const time  = timeMatch ? timeMatch[1] : '00:00:00';
+    txnDate = new Date(`${year}-${month}-${day}T${time}+08:00`);
+  } else {
+    txnDate = emailDate;
+  }
+
+  return {
+    amount,
+    merchant,
+    category: guessCategory(rawMerchant),
+    date: txnDate.toISOString(),
+    notes: '',
+  };
+}
+
+// ─────────────────────────────────────────────
 // MAIN — called by the time trigger
 // ─────────────────────────────────────────────
 
-function processPayLahEmails() {
+function processEmailAlerts() {
   const config = getConfig();
   if (!config.notionKey || !config.dbId) {
     console.error('Missing config — run setConfig() first.');
@@ -168,40 +218,43 @@ function processPayLahEmails() {
   let label = GmailApp.getUserLabelByName('spendly-processed');
   if (!label) label = GmailApp.createLabel('spendly-processed');
 
-  // Only look at emails on or after the date createTrigger() was first run
   const startDate = PropertiesService.getScriptProperties().getProperty('START_DATE')
     || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd');
 
-  // Fetch up to 20 unprocessed PayLah alert threads from the start date onwards
-  const threads = GmailApp.search(
-    `from:paylah.alert@dbs.com -label:spendly-processed after:${startDate}`, 0, 20
-  );
+  const SOURCES = [
+    { query: `from:paylah.alert@dbs.com -label:spendly-processed after:${startDate}`,  parser: parsePayLahEmail },
+    { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`, parser: parseCitiEmail   },
+  ];
 
   let processed = 0;
   let failed    = 0;
+  let total     = 0;
 
-  for (const thread of threads) {
-    for (const message of thread.getMessages()) {
-      const body = message.getPlainBody();
-      const txn  = parsePayLahEmail(body, message.getDate());
+  for (const source of SOURCES) {
+    const threads = GmailApp.search(source.query, 0, 20);
+    total += threads.length;
 
-      if (!txn) {
-        console.warn('Could not parse email:', message.getSubject());
-        continue;
+    for (const thread of threads) {
+      for (const message of thread.getMessages()) {
+        const body = message.getPlainBody();
+        const txn  = source.parser(body, message.getDate());
+
+        if (!txn) {
+          console.warn('Could not parse email:', message.getSubject());
+          continue;
+        }
+
+        const ok = createNotionPage(txn, config);
+        ok ? processed++ : failed++;
+
+        console.log(`${ok ? '✓' : '✗'} ${txn.merchant} — SGD ${txn.amount.toFixed(2)} [${txn.category}]`);
       }
 
-      const ok = createNotionPage(txn, config);
-      ok ? processed++ : failed++;
-
-      console.log(`${ok ? '✓' : '✗'} ${txn.merchant} — SGD ${txn.amount.toFixed(2)} [${txn.category}]`);
+      thread.addLabel(label);
     }
-
-    // Label the thread regardless so we don't retry failed ones endlessly;
-    // check Notion manually if something looks missing.
-    thread.addLabel(label);
   }
 
-  console.log(`Done — ${processed} synced, ${failed} failed, ${threads.length} threads processed.`);
+  console.log(`Done — ${processed} synced, ${failed} failed, ${total} threads processed.`);
 }
 
 // ─────────────────────────────────────────────
@@ -209,7 +262,7 @@ function processPayLahEmails() {
 // ─────────────────────────────────────────────
 
 /**
- * Creates a time-based trigger that runs processPayLahEmails every 12 hours.
+ * Creates a time-based trigger that runs processEmailAlerts every 12 hours.
  * Also records today as the cutoff — emails before this date are always ignored.
  * Run this function once from the Apps Script editor.
  *
@@ -223,21 +276,21 @@ function createTrigger() {
 
   // Remove any existing triggers for this function to avoid duplicates
   ScriptApp.getProjectTriggers()
-    .filter(t => t.getHandlerFunction() === 'processPayLahEmails')
+    .filter(t => t.getHandlerFunction() === 'processEmailAlerts')
     .forEach(t => ScriptApp.deleteTrigger(t));
 
-  ScriptApp.newTrigger('processPayLahEmails')
+  ScriptApp.newTrigger('processEmailAlerts')
     .timeBased()
     .everyHours(12)
     .create();
 
-  console.log(`Trigger created — processPayLahEmails runs every 12 hours, starting from ${startDate}.`);
+  console.log(`Trigger created — processEmailAlerts runs every 12 hours, starting from ${startDate}.`);
 }
 
 /** Removes all triggers (use if you want to pause the sync). */
 function removeTrigger() {
   ScriptApp.getProjectTriggers()
-    .filter(t => t.getHandlerFunction() === 'processPayLahEmails')
+    .filter(t => t.getHandlerFunction() === 'processEmailAlerts')
     .forEach(t => ScriptApp.deleteTrigger(t));
   console.log('Trigger removed.');
 }
