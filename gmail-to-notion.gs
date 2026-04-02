@@ -127,7 +127,6 @@ function createNotionPage(txn, config) {
       Amount:   { number: txn.amount },
       Category: { select: { name: txn.category } },
       Date:     { date:   { start: txn.date } },
-      ...(txn.notes && { Notes: { rich_text: [{ text: { content: txn.notes } }] } }),
     },
   };
 
@@ -218,8 +217,9 @@ function processEmailAlerts() {
     || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd');
 
   const SOURCES = [
-    { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" -label:spendly-processed after:${startDate}`,  parser: parsePayLahEmail },
-    { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`, parser: parseCitiEmail   },
+    { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" -label:spendly-processed after:${startDate}`,                                     parser: parsePayLahEmail },
+    { query: `from:ibanking.alert@dbs.com subject:"Card Transaction Alert" -label:spendly-processed after:${startDate}`,                                parser: parsePayLahEmail },
+    { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`,    parser: parseCitiEmail   },
   ];
 
   let processed = 0;
@@ -266,8 +266,9 @@ function processEmailAlerts() {
  * 10 is not a valid interval, so 12 (twice a day) is the closest option.
  */
 function createTrigger() {
-  // Record today as the start date — emails before this will always be skipped
-  const startDate = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd');
+  // Set the cutoff to 1 hour before now so any emails in that window are picked up
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const startDate = Utilities.formatDate(oneHourAgo, Session.getScriptTimeZone(), 'yyyy/MM/dd');
   PropertiesService.getScriptProperties().setProperty('START_DATE', startDate);
 
   // Remove any existing triggers for this function to avoid duplicates
