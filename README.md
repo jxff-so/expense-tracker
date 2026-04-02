@@ -27,7 +27,7 @@ A personal mobile expense tracker (Spendly) that syncs to a Notion database via 
 | `Amount`    | Number          | Stores the expense amount  |
 | `Category`  | Select          | e.g. Food, Transport, etc. |
 | `Date`      | Date            | Transaction date           |
-| `Notes`     | Text (Rich text)| Optional notes             |
+| `Notes`     | Text (Rich text)| Optional notes, necessary if implementing PayLah!             |
 
 4. Open the database page → click **•••** (top-right) → **Connections** → search for `Spendly` → **Connect**.
 
