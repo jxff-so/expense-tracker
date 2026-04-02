@@ -218,7 +218,7 @@ function processEmailAlerts() {
     || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd');
 
   const SOURCES = [
-    { query: `from:paylah.alert@dbs.com -label:spendly-processed after:${startDate}`,  parser: parsePayLahEmail },
+    { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" -label:spendly-processed after:${startDate}`,  parser: parsePayLahEmail },
     { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`, parser: parseCitiEmail   },
   ];
 

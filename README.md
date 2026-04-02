@@ -108,7 +108,7 @@ function setConfig() {
 
 | Bank | Sender | Subject filter |
 |------|--------|----------------|
-| DBS PayLah! | `paylah.alert@dbs.com` | *(any)* |
+| DBS PayLah! | `paylah.alert@dbs.com` | `Transaction Alerts` |
 | Citibank | `alerts@citibank.com.sg` | `Citi Alerts - Credit Card/Ready Credit Transaction` |
 
 
