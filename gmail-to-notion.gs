@@ -164,7 +164,7 @@ function createNotionPage(txn, config) {
  */
 function parseCitiEmail(body, emailDate) {
   // Amount — "Transaction amount: 500" or "Transaction amount: 12.50"
-  const amountMatch = body.match(/Transaction\s+amount\s*:\s*([\d,]+(?:\.\d{1,2})?)/i);
+  const amountMatch = body.match(/Transaction\s+amount\s*:\s*(?:SGD\s*)?([\d,]+(?:\.\d{1,2})?)/i);
   if (!amountMatch) return null;
   const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
   if (!amount || amount <= 0) return null;
