@@ -111,6 +111,7 @@ function setConfig() {
 | DBS PayLah! | `paylah.alert@dbs.com` | `Transaction Alerts` |
 | DBS Card | `ibanking.alert@dbs.com` | `Card Transaction Alert` |
 | Citibank | `alerts@citibank.com.sg` | `Citi Alerts - Credit Card/Ready Credit Transaction` |
+| OCBC | `notifications@ocbc.com` | `PayNow transfer made` |
 
 
 ### Category Auto-Detection

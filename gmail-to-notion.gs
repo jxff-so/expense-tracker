@@ -1,7 +1,7 @@
 /**
  * Spendly — Gmail → Notion Auto-Sync
  *
- * Watches for PayLah! + Citibank transaction alert emails and automatically
+ * Watches for PayLah! + Citibank + OCBC transaction alert emails and automatically
  * logs them to your Notion Expenses database.
  *
  * SETUP:
@@ -19,7 +19,7 @@
 function setConfig() {
   const props = PropertiesService.getScriptProperties();
   props.setProperties({
-    NOTION_KEY: 'secret_xxxxxxxxxxxxxxxxxxxxxxxxxxxx', // your Notion integration token
+    NOTION_KEY: 'ntn_xxxxxxxxxxxxxxxxxxxxxxxxxxxx', // your Notion integration token
     NOTION_DB_ID: 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',  // 32-char database ID
   });
   console.log('Config saved.');
@@ -66,7 +66,7 @@ function guessCategory(merchant) {
  * or null if the email doesn't match the expected format.
  *
  * Expected format (key parts):
- *   Date & Time:28 Mar 20:17 (SGT)Amount:SGD5.00From:PayLah! Wallet (...)To:MERCHANT NAME
+ *   Date & Time:20 Mar 12:00 (SGT)Amount:SGD5.00From:PayLah! Wallet (...)To:MERCHANT NAME
  */
 function parsePayLahEmail(body, emailDate) {
   // Amount — "Amount:SGD5.00" or "Amount: SGD 5.00"
@@ -82,12 +82,12 @@ function parsePayLahEmail(body, emailDate) {
   const rawMerchant = merchantMatch ? merchantMatch[1].trim() : 'PayLah! Payment';
   const merchant = cleanMerchantName(rawMerchant);
 
-  // Date — "Date & Time:28 Mar 20:17 (SGT)"
+  // Date — "Date & Time:20 Mar 12:00 (SGT)"
   const dateMatch = body.match(/Date\s*&\s*Time:\s*(\d{1,2}\s+\w{3})\s+(\d{2}:\d{2})/i);
   let txnDate;
   if (dateMatch) {
     const year = emailDate.getFullYear();
-    // Parse "28 Mar" and combine with email's year and the extracted time
+    // Parse "20 Mar" and combine with email's year and the extracted time
     const parsed = new Date(`${dateMatch[1]} ${year} ${dateMatch[2]} GMT+0800`);
     // Guard against year rollover (e.g. Dec email processed in Jan)
     txnDate = parsed > new Date() ? new Date(`${dateMatch[1]} ${year - 1} ${dateMatch[2]} GMT+0800`) : parsed;
@@ -199,6 +199,51 @@ function parseCitiEmail(body, emailDate) {
 }
 
 // ─────────────────────────────────────────────
+// OCBC PARSER
+// ─────────────────────────────────────────────
+
+/**
+ * Parses an OCBC PayNow transfer alert email body.
+ *
+ * Expected format (key parts):
+ *   The following PayNow transfer has been made to MERCHANT NAME using their...
+ *   Date  : 20 Mar 2020
+ *   Time  : 12:00 PM SGT
+ *   Amount : SGD 200.00
+ */
+function parseOCBCEmail(body, emailDate) {
+  // Amount — "Amount : SGD 200.00"
+  const amountMatch = body.match(/Amount\s*:\s*SGD\s*([\d,]+(?:\.\d{1,2})?)/i);
+  if (!amountMatch) return null;
+  const amount = parseFloat(amountMatch[1].replace(/,/g, ''));
+  if (!amount || amount <= 0) return null;
+
+  // Merchant — "made to MERCHANT NAME using their"
+  const merchantMatch = body.match(/made to\s+(.+?)\s+using their/i);
+  const rawMerchant = merchantMatch ? merchantMatch[1].trim() : 'OCBC PayNow';
+  const merchant = cleanMerchantName(rawMerchant);
+
+  // Date — "Date : 20 Mar 2020" + Time — "Time : 12:00 PM SGT"
+  const dateMatch = body.match(/Date\s*:\s*(\d{1,2}\s+\w{3}\s+\d{4})/i);
+  const timeMatch = body.match(/Time\s*:\s*(\d{2}:\d{2})/i);
+  let txnDate;
+  if (dateMatch) {
+    const time = timeMatch ? timeMatch[1] : '00:00';
+    txnDate = new Date(`${dateMatch[1]} ${time} GMT+0800`);
+  } else {
+    txnDate = emailDate;
+  }
+
+  return {
+    amount,
+    merchant,
+    category: guessCategory(rawMerchant),
+    date: txnDate.toISOString(),
+    notes: '',
+  };
+}
+
+// ─────────────────────────────────────────────
 // MAIN — called by the time trigger
 // ─────────────────────────────────────────────
 
@@ -220,6 +265,7 @@ function processEmailAlerts() {
     { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" -label:spendly-processed after:${startDate}`,                                     parser: parsePayLahEmail },
     { query: `from:ibanking.alert@dbs.com subject:"Card Transaction Alert" -label:spendly-processed after:${startDate}`,                                parser: parsePayLahEmail },
     { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`,    parser: parseCitiEmail   },
+    { query: `from:notifications@ocbc.com subject:"PayNow transfer made" -label:spendly-processed after:${startDate}`,                                   parser: parseOCBCEmail   },
   ];
 
   let processed = 0;
