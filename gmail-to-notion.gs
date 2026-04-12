@@ -244,6 +244,27 @@ function parseOCBCEmail(body, emailDate) {
 }
 
 // ─────────────────────────────────────────────
+// PROCESSED MESSAGE ID TRACKING
+// ─────────────────────────────────────────────
+
+/**
+ * Loads the set of already-processed Gmail message IDs from script properties.
+ * We track individual message IDs because thread labels are unreliable — when a
+ * new email arrives in an already-labelled thread, Gmail resurfaces that thread
+ * in search results and thread.getMessages() returns all old messages too.
+ */
+function getProcessedIds() {
+  const raw = PropertiesService.getScriptProperties().getProperty('PROCESSED_IDS');
+  return raw ? new Set(JSON.parse(raw)) : new Set();
+}
+
+/** Persists the processed ID set, keeping only the 1 000 most recent entries. */
+function saveProcessedIds(ids) {
+  const arr = [...ids].slice(-1000);
+  PropertiesService.getScriptProperties().setProperty('PROCESSED_IDS', JSON.stringify(arr));
+}
+
+// ─────────────────────────────────────────────
 // MAIN — called by the time trigger
 // ─────────────────────────────────────────────
 
@@ -262,32 +283,52 @@ function processEmailAlerts() {
     || Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyy/MM/dd');
 
   const SOURCES = [
-    { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" -label:spendly-processed after:${startDate}`,                                     parser: parsePayLahEmail },
-    { query: `from:ibanking.alert@dbs.com subject:"Card Transaction Alert" -label:spendly-processed after:${startDate}`,                                parser: parsePayLahEmail },
-    { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" -label:spendly-processed after:${startDate}`,    parser: parseCitiEmail   },
-    { query: `from:notifications@ocbc.com subject:"PayNow transfer made" -label:spendly-processed after:${startDate}`,                                   parser: parseOCBCEmail   },
+    { query: `from:paylah.alert@dbs.com subject:"Transaction Alerts" after:${startDate}`,                                     parser: parsePayLahEmail },
+    { query: `from:ibanking.alert@dbs.com subject:"Card Transaction Alert" after:${startDate}`,                                parser: parsePayLahEmail },
+    { query: `from:alerts@citibank.com.sg subject:"Citi Alerts - Credit Card/Ready Credit Transaction" after:${startDate}`,    parser: parseCitiEmail   },
+    { query: `from:notifications@ocbc.com subject:"PayNow transfer made" after:${startDate}`,                                   parser: parseOCBCEmail   },
   ];
 
+  const processedIds = getProcessedIds();
   let processed = 0;
   let failed    = 0;
+  let skipped   = 0;
   let total     = 0;
 
   for (const source of SOURCES) {
-    const threads = GmailApp.search(source.query, 0, 20);
+    const threads = GmailApp.search(source.query, 0, 50);
     total += threads.length;
 
     for (const thread of threads) {
       for (const message of thread.getMessages()) {
+        const msgId = message.getId();
+
+        // Skip messages we've already logged — this is the primary duplicate guard.
+        // Thread labels alone are not enough because a new message arriving in an
+        // existing thread causes Gmail to resurface it, and getMessages() returns
+        // ALL messages in the thread, including already-processed ones.
+        if (processedIds.has(msgId)) {
+          skipped++;
+          continue;
+        }
+
         const body = message.getPlainBody();
         const txn  = source.parser(body, message.getDate());
 
         if (!txn) {
           console.warn('Could not parse email:', message.getSubject());
+          // Still mark it as seen so we don't warn about it every run
+          processedIds.add(msgId);
           continue;
         }
 
         const ok = createNotionPage(txn, config);
-        ok ? processed++ : failed++;
+        if (ok) {
+          processed++;
+          processedIds.add(msgId);
+        } else {
+          failed++;
+        }
 
         console.log(`${ok ? '✓' : '✗'} ${txn.merchant} — SGD ${txn.amount.toFixed(2)} [${txn.category}]`);
       }
@@ -296,7 +337,8 @@ function processEmailAlerts() {
     }
   }
 
-  console.log(`Done — ${processed} synced, ${failed} failed, ${total} threads processed.`);
+  saveProcessedIds(processedIds);
+  console.log(`Done — ${processed} synced, ${failed} failed, ${skipped} skipped (already logged), ${total} threads scanned.`);
 }
 
 // ─────────────────────────────────────────────
