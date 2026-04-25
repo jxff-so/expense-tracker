@@ -32,10 +32,38 @@ export default {
           status: 400, headers: { ...CORS, "Content-Type": "application/json" },
         });
       }
-      notionRes = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
-        method: "POST",
-        headers: notionHeaders,
-        body: JSON.stringify({ page_size: 100 }),
+
+      let results = [];
+      let hasMore = true;
+      let startCursor;
+
+      while (hasMore) {
+        const payload = { page_size: 100 };
+        if (startCursor) payload.start_cursor = startCursor;
+
+        const pageRes = await fetch(`${NOTION_API}/databases/${dbId}/query`, {
+          method: "POST",
+          headers: notionHeaders,
+          body: JSON.stringify(payload),
+        });
+
+        if (!pageRes.ok) {
+          const errorText = await pageRes.text();
+          return new Response(errorText, {
+            status: pageRes.status,
+            headers: { ...CORS, "Content-Type": "application/json" },
+          });
+        }
+
+        const pageData = await pageRes.json();
+        results = results.concat(pageData.results || []);
+        hasMore = pageData.has_more;
+        startCursor = pageData.next_cursor;
+      }
+
+      notionRes = new Response(JSON.stringify({ results }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
       });
 
     } else if (request.method === "POST") {
